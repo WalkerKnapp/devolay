@@ -1,0 +1,40 @@
+import org.gradle.internal.jvm.Jvm
+
+import java.nio.file.Files
+
+plugins {
+    id 'cpp-library'
+}
+
+group 'com.walker'
+version '1.0-SNAPSHOT'
+
+library {
+    binaries.configureEach {
+        // Force the CPP library to build C instead
+        def compileTask = compileTask.get()
+        compileTask.source.from fileTree(dir: "src/main/c", include: "**/*.c")
+        if (toolChain instanceof VisualCpp) {
+            compileTask.compilerArgs = ["/TC"]
+        } else if (toolChain instanceof GccCompatibleToolChain) {
+            compileTask.compilerArgs = ["-x", "c", "-std=c11"]
+        }
+
+        def linkTask = linkTask.get()
+        if (toolChain instanceof GccCompatibleToolChain) {
+            linkTask.linkerArgs = ["-nodefaultlibs", "-lc"]
+        }
+    }
+}
+
+components.main.binaries.whenElementFinalized { binary ->
+    project.dependencies {
+        System.out.println("Attempting to link jni path, ")
+        def javaIndludes = Jvm.current().javaHome.toPath().resolve("include")
+        add(binary.includePathConfiguration.name, files(javaIndludes))
+        
+        for(java.nio.file.Path child : Files.newDirectoryStream(javaIndludes, { path -> Files.isDirectory(path) })) {
+            add(binary.includePathConfiguration.name, files(child))
+        }
+    }
+}

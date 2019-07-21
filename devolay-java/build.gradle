@@ -1,0 +1,33 @@
+import org.gradle.internal.jvm.Jvm
+
+plugins {
+    id 'java'
+}
+
+group 'com.walker'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 9
+
+task generateJniHeaders(type: Exec, description: 'Generates C headers for JNI by running javah', group: 'build', dependsOn: classes) {
+    def nativeIncludes = "src/main/c/include"
+
+    ArrayList<String> javacCommand = new ArrayList<String>()
+    javacCommand.add(Jvm.current().javacExecutable.toString())
+    javacCommand.add("-h")
+    javacCommand.add(nativeIncludes)
+
+    sourceSets.main.allJava.forEach({ sourceFile ->
+        javacCommand.add(sourceFile.toPath().toAbsolutePath().toString())
+    })
+
+    commandLine javacCommand.toArray()
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}

@@ -39,6 +39,10 @@ public class DevolayAudioFrame implements AutoCloseable {
         setNoChannels(structPointer, channels);
     }
 
+    public void setSamples(int samples) {
+        setNoSamples(structPointer, samples);
+    }
+
     public void setTimecode(long timecode) {
         setTimecode(structPointer, timecode);
     }
@@ -71,6 +75,7 @@ public class DevolayAudioFrame implements AutoCloseable {
 
     private static native void setSampleRate(long structPointer, int sampleRate);
     private static native void setNoChannels(long structPointer, int noChannels);
+    private static native void setNoSamples(long structPointer, int noSamples);
     private static native void setTimecode(long structPointer, long timecode);
     private static native void setChannelStride(long structPointer, int channelStride);
     private static native void setMetadata(long structPointer, String metadata);

@@ -13,28 +13,55 @@ library {
     binaries.configureEach {
         // Force the CPP library to build C instead
         def compileTask = compileTask.get()
-        compileTask.source.from fileTree(dir: "src/main/c", include: "**/*.c")
+        //compileTask.source.from fileTree(dir: "src/main/c", include: "*\*\/*.c")
         if (toolChain instanceof VisualCpp) {
-            compileTask.compilerArgs = ["/TC"]
+            compileTask.compilerArgs = ["/std:c++latest"]
         } else if (toolChain instanceof GccCompatibleToolChain) {
-            compileTask.compilerArgs = ["-x", "c", "-std=c11"]
-        }
-
-        def linkTask = linkTask.get()
-        if (toolChain instanceof GccCompatibleToolChain) {
-            linkTask.linkerArgs = ["-nodefaultlibs", "-lc"]
+            compileTask.compilerArgs = ["-std=c++17"]
         }
     }
 }
 
+// Include the JNI headers and link/include the NDI(tm) SDK
 components.main.binaries.whenElementFinalized { binary ->
     project.dependencies {
-        System.out.println("Attempting to link jni path, ")
+        System.out.println("Including JNI Path")
         def javaIndludes = Jvm.current().javaHome.toPath().resolve("include")
         add(binary.includePathConfiguration.name, files(javaIndludes))
         
         for(java.nio.file.Path child : Files.newDirectoryStream(javaIndludes, { path -> Files.isDirectory(path) })) {
             add(binary.includePathConfiguration.name, files(child))
         }
+        
+        System.out.println("Linking/Including NDI(tm) SDK Path")
+        def ndiSdkInstall = file(System.getenv("NDI_SDK_DIR")).toPath()
+        def ndiIncludePath = ndiSdkInstall.resolve("Include")
+        
+        def architectureName = binary.getTargetPlatform().getTargetMachine().getArchitecture().getName() 
+        
+        if(architectureName == MachineArchitecture.X86) {
+            def ndiLibPath = OperatingSystem.current().getSharedLibraryName(ndiSdkInstall.resolve("Lib").resolve("x86"))
+        } else if (architectureName == MachineArchitecture.X86_64) {
+            def ndiLibPath = ndiSdkInstall.resolve("Lib").resolve("x64")
+        } else {
+            throw new GradleException("Unknown target platform: " + architectureName)
+        }
+        
+        add(binary.includePathConfiguration.name, files(ndiIncludePath));
+
+        // All of the needed boost libraries
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/dll/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/config/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/predef/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/core/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/type_traits/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/throw_exception/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/assert/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/static_assert/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/winapi/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/move/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/smart_ptr/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/mpl/include"))
+        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/preprocessor/include"))
     }
 }

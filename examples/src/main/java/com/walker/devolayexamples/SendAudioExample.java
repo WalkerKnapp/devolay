@@ -1,5 +1,6 @@
 package com.walker.devolayexamples;
 
+import com.walker.devolay.Devolay;
 import com.walker.devolay.DevolayAudioFrame;
 import com.walker.devolay.DevolaySender;
 
@@ -12,6 +13,8 @@ import java.nio.FloatBuffer;
  */
 public class SendAudioExample {
     public static void main(String[] args) {
+        Devolay.loadLibraries();
+
         DevolaySender sender = new DevolaySender("Devolay Example Audio", null, false, true);
 
         final int sampleRate = 48000;
@@ -29,7 +32,7 @@ public class SendAudioExample {
         audioFrame.setData(data);
         audioFrame.setChannelStride((sampleCount * Float.SIZE) / Byte.SIZE);
 
-        // Generate 10 seconds of a 4 different sine wave frequencies
+        // Generate 10 seconds of 4 different sine wave frequencies
         final float c6NoteFreq = 1046.50f;
         final float e6NoteFreq = 1318.51f;
         final float g6NoteFreq = 1567.98f;

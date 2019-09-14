@@ -1,0 +1,57 @@
+[submodule "devolay-natives/lib/dll"]
+	path = devolay-natives/lib/dll
+	url = https://github.com/boostorg/dll.git
+[submodule "devolay-natives.lib.dll"]
+	branch = develop
+[submodule "devolay-natives/lib/config"]
+	path = devolay-natives/lib/config
+	url = https://github.com/boostorg/config.git
+	branch = develop
+[submodule "devolay-natives/lib/predef"]
+	path = devolay-natives/lib/predef
+	url = https://github.com/boostorg/predef.git
+	branch = develop
+[submodule "devolay-natives/lib/core"]
+	path = devolay-natives/lib/core
+	url = https://github.com/boostorg/core.git
+	branch = develop
+[submodule "devolay-natives/lib/type_traits"]
+	path = devolay-natives/lib/type_traits
+	url = https://github.com/boostorg/type_traits.git
+	branch = develop
+[submodule "devolay-natives/lib/throw_exception"]
+	path = devolay-natives/lib/throw_exception
+	url = https://github.com/boostorg/throw_exception.git
+	branch = develop
+[submodule "devolay-natives/lib/assert"]
+	path = devolay-natives/lib/assert
+	url = https://github.com/boostorg/assert.git
+	branch = develop
+[submodule "devolay-natives/lib/static_assert"]
+	path = devolay-natives/lib/static_assert
+	url = https://github.com/boostorg/static_assert.git
+	branch = develop
+[submodule "devolay-natives/lib/system"]
+	path = devolay-natives/lib/system
+	url = https://github.com/boostorg/system.git
+	branch = develop
+[submodule "devolay-natives/lib/winapi"]
+	path = devolay-natives/lib/winapi
+	url = https://github.com/boostorg/winapi.git
+	branch = develop
+[submodule "devolay-natives/lib/move"]
+	path = devolay-natives/lib/move
+	url = https://github.com/boostorg/move.git
+	branch = develop
+[submodule "devolay-natives/lib/smart_ptr"]
+	path = devolay-natives/lib/smart_ptr
+	url = https://github.com/boostorg/smart_ptr.git
+	branch = develop
+[submodule "devolay-natives/lib/mpl"]
+	path = devolay-natives/lib/mpl
+	url = https://github.com/boostorg/mpl.git
+	branch = develop
+[submodule "devolay-natives/lib/preprocessor"]
+	path = devolay-natives/lib/preprocessor
+	url = https://github.com/boostorg/preprocessor
+	branch = develop

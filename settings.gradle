@@ -3,4 +3,5 @@ rootProject.name = 'devolay'
 include 'devolay-java'
 include 'devolay-natives'
 include 'examples'
+include 'ndi-natives'
 

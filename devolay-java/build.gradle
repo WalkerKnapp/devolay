@@ -10,7 +10,7 @@ version '0.0.1'
 sourceCompatibility = 9
 
 task generateJniHeaders(type: Exec, description: 'Generates C headers for JNI by running javah', group: 'build', dependsOn: classes) {
-    def nativeIncludes = "src/main/c/include"
+    def nativeIncludes = "../devolay-natives/src/main/headers"
 
     ArrayList<String> javacCommand = new ArrayList<String>()
     javacCommand.add(Jvm.current().javacExecutable.toString())
@@ -30,4 +30,16 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+compileJava {
+    dependsOn ":devolay-natives:assemble"
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs 'src/main/resources', project(":devolay-natives").buildDir.getAbsolutePath() + '/lib/main/debug'
+        }
+    }
 }

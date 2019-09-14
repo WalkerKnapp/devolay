@@ -38,8 +38,8 @@ public class SendAudioExample {
         final float g6NoteFreq = 1567.98f;
         final float c7NoteFreq = 2093.00f;
         final float[] frequencyPerChannel = {c6NoteFreq, e6NoteFreq, g6NoteFreq, c7NoteFreq};
-        // Ten seconds of samples
-        final int totalSamplesToSend = sampleRate * 10;
+        // Thirty seconds of samples
+        final int totalSamplesToSend = sampleRate * 30;
 
         for(int i = 0; i < totalSamplesToSend; i += sampleCount) {
             floatData.position(0);

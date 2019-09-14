@@ -7,46 +7,67 @@
 #include "../headers/com_walker_devolay_DevolayMetadataFrame.h"
 #include "../headers/com_walker_devolay_DevolayVideoFrame.h"
 
-/** Audio Frame **/
 jlong Java_com_walker_devolay_DevolayAudioFrame_createNewAudioFrameDefaultSettings(JNIEnv * env, jclass jClazz) {
     printf("createNewAudioFrameDefaultSettings\n");
-    return 0;
+    NDIlib_audio_frame_v2_t *NDI_audio_frame = new NDIlib_audio_frame_v2_t();
+    return (jlong) NDI_audio_frame;
 }
 
 void Java_com_walker_devolay_DevolayAudioFrame_destroyAudioFrame(JNIEnv *env, jclass jClazz, jlong pFrame) {
     printf("destroyAudioFrame\n");
+
+    delete reinterpret_cast<NDIlib_audio_frame_v2_t *>(pFrame);
 }
 
 void Java_com_walker_devolay_DevolayAudioFrame_setSampleRate(JNIEnv *env, jclass jClazz, jlong pFrame, jint jSampleRate) {
     printf("setSampleRate\n");
+
+    reinterpret_cast<NDIlib_audio_frame_v2_t *>(pFrame)->sample_rate = jSampleRate;
 }
 
 void Java_com_walker_devolay_DevolayAudioFrame_setNoChannels(JNIEnv *env, jclass jClazz, jlong pFrame, jint jNoChannels) {
     printf("setNoChannels\n");
+
+    reinterpret_cast<NDIlib_audio_frame_v2_t *>(pFrame)->no_channels = jNoChannels;
 }
 
 void Java_com_walker_devolay_DevolayAudioFrame_setNoSamples(JNIEnv *env , jclass jClazz, jlong pFrame, jint jNoSamples) {
     printf("setNoSamples\n");
+
+    reinterpret_cast<NDIlib_audio_frame_v2_t *>(pFrame)->no_samples = jNoSamples;
 }
 
 void Java_com_walker_devolay_DevolayAudioFrame_setTimecode(JNIEnv *env, jclass jClazz, jlong pFrame, jlong jTimecode) {
     printf("setTimecode\n");
+
+    reinterpret_cast<NDIlib_audio_frame_v2_t *>(pFrame)->timecode = jTimecode;
 }
 
 void Java_com_walker_devolay_DevolayAudioFrame_setChannelStride(JNIEnv *env, jclass jClazz, jlong pFrame, jint jChannelStride) {
     printf("setChannelStride\n");
+
+    reinterpret_cast<NDIlib_audio_frame_v2_t *>(pFrame)->channel_stride_in_bytes = jChannelStride;
 }
 
 void Java_com_walker_devolay_DevolayAudioFrame_setMetadata(JNIEnv *env, jclass jClazz, jlong pFrame, jstring jMetadata) {
     printf("setMetadata\n");
+
+    const char *metadata = env->GetStringUTFChars(jMetadata, reinterpret_cast<jboolean *>(true));
+
+    reinterpret_cast<NDIlib_audio_frame_v2_t *>(pFrame)->p_metadata = metadata;
 }
 
 void Java_com_walker_devolay_DevolayAudioFrame_setTimestamp(JNIEnv *env, jclass jClazz, jlong pFrame, jlong jTimestamp) {
     printf("setTimestamp\n");
+
+    reinterpret_cast<NDIlib_audio_frame_v2_t *>(pFrame)->timestamp = jTimestamp;
 }
 
 void Java_com_walker_devolay_DevolayAudioFrame_setData(JNIEnv *env, jclass jClazz, jlong pFrame, jobject jData) {
     printf("setData\n");
+
+    reinterpret_cast<NDIlib_audio_frame_v2_t *>(pFrame)->p_data = static_cast<float *>(env->GetDirectBufferAddress(
+            jData));
 }
 
 /** Metadata Frame **/

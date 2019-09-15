@@ -4,6 +4,6 @@
 
 #include <Processing.NDI.Lib.h>
 
-extern NDIlib_v3 *getNDILib();
+extern const NDIlib_v3 *getNDILib();
 
 #endif //DEVOLAY_DEVOLAY_H

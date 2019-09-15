@@ -29,22 +29,6 @@ jlong Java_com_walker_devolay_DevolaySender_sendCreate(JNIEnv *env, jclass jClaz
     NDI_send_create_desc->clock_video = jClockVideo;
     NDI_send_create_desc->clock_audio = jClockAudio;
 
-    printf("context2 pointer: %p\n", getNDILib());
-    printf("context2 func: %p\n", getNDILib()->NDIlib_is_supported_CPU);
-
-    printf("typeof func: %s\n", typeid(getNDILib()->NDIlib_is_supported_CPU).name());
-
-    std::function<bool(void)> supportedFunc = getNDILib()->NDIlib_is_supported_CPU;
-
-    printf("typeof supportedFunc: %s\n", typeid(supportedFunc).name());
-    printf("target: %s\n", supportedFunc.target_type().name());
-
-    printf("read: %ld\n", *((long *)getNDILib()->NDIlib_is_supported_CPU));
-    printf("supportedFunc: %i\n", supportedFunc());
-
-
-    printf("context2 value: %i\n", getNDILib()->NDIlib_is_supported_CPU());
-
     auto ret = getNDILib()->NDIlib_send_create(NDI_send_create_desc);
     delete NDI_send_create_desc;
     return (jlong) ret;

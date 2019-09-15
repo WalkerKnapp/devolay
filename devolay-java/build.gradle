@@ -2,6 +2,7 @@ import org.gradle.internal.jvm.Jvm
 
 plugins {
     id 'java'
+    id 'maven'
 }
 
 group 'com.walker'

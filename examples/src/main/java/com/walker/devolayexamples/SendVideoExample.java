@@ -27,7 +27,7 @@ public class SendVideoExample {
         videoFrame.setResolution(width, height);
         videoFrame.setFourCCType(DevolayFrameFourCCType.NDIlib_FourCC_type_BGRX);
         videoFrame.setData(data);
-        videoFrame.setFrameRate(60, 1);
+        videoFrame.setFrameRate(30, 1);
 
         int frameCounter = 0;
         long fpsPeriod = System.currentTimeMillis();
@@ -36,19 +36,29 @@ public class SendVideoExample {
         long startTime = System.currentTimeMillis();
         while(System.currentTimeMillis() - startTime < 1000 * 60) {
 
+            double frameOffset = Math.sin(frameCounter / 120d);
+
             //Fill in the buffer for one frame.
             data.position(0);
             for(int i = 0; i < width * height; i++) {
                 double xCoord = i % width;
                 double yCoord = i / width;
 
-                double frameOffset = (frameCounter % 120) / 120d;
                 double convertedX = xCoord/width;
                 double convertedY = yCoord/height;
 
-                byte r = (byte) (255 * Math.sqrt(Math.pow(convertedX + frameOffset, 2) + Math.pow(convertedY, 2)));
-                byte g = (byte) (255 * Math.sqrt(Math.pow(convertedX + frameOffset - 1, 2) + Math.pow(convertedY, 2)));
-                byte b = (byte) (255 * Math.sqrt(Math.pow(convertedX + frameOffset, 2) + Math.pow(convertedY - 1, 2)));
+                double xWithFrameOffset = convertedX + frameOffset;
+                double xWithScreenOffset = xWithFrameOffset - 1;
+                double yWithScreenOffset = convertedY + 1;
+
+                double squaredX = xWithFrameOffset * xWithFrameOffset;
+                double offsetSquaredX = xWithScreenOffset * xWithScreenOffset;
+                double squaredY = convertedY * convertedY;
+                double offsetSquaredY = yWithScreenOffset * yWithScreenOffset;
+
+                byte r = (byte) (Math.min(255 * Math.sqrt(squaredX + squaredY), 255));
+                byte g = (byte) (Math.min(255 * Math.sqrt(offsetSquaredX + squaredY), 255));
+                byte b = (byte) (Math.min(255 * Math.sqrt(squaredX + offsetSquaredY), 255));
 
                 data.put(b).put(g).put(r).put((byte)255);
             }

@@ -18,6 +18,7 @@ library {
             compileTask.compilerArgs = ["/std:c++latest"]
         } else if (toolChain instanceof GccCompatibleToolChain) {
             compileTask.compilerArgs = ["-std=c++17"]
+            compileTask.compilerArgs = ["-lstdc++fs"]
         }
     }
 }
@@ -26,7 +27,9 @@ library {
 components.main.binaries.whenElementFinalized { binary ->
     project.dependencies {
         System.out.println("Including JNI Path")
+        //Thread.sleep(1000 * 10)
         def javaIndludes = Jvm.current().javaHome.toPath().resolve("include")
+        //System.out.println(javaIndludes)
         add(binary.includePathConfiguration.name, files(javaIndludes))
         
         for(java.nio.file.Path child : Files.newDirectoryStream(javaIndludes, { path -> Files.isDirectory(path) })) {
@@ -34,15 +37,20 @@ components.main.binaries.whenElementFinalized { binary ->
         }
         
         System.out.println("Linking/Including NDI(tm) SDK Path")
-        def ndiSdkInstall = file(System.getenv("NDI_SDK_DIR")).toPath()
-        def ndiIncludePath = ndiSdkInstall.resolve("Include")
+        
+        if(System.getenv("NDI_SDK_DIR") == null) {
+             throw new IllegalStateException("NDI SDK not found: NDI_SDK_DIR environment variable does not exist.")
+        }
+
+        def ndiSdkPath = file(System.getenv("NDI_SDK_DIR")).toPath();
+        def ndiIncludePath = ndiSdkPath.resolve("Include")
         
         def architectureName = binary.getTargetPlatform().getTargetMachine().getArchitecture().getName() 
         
         if(architectureName == MachineArchitecture.X86) {
-            def ndiLibPath = OperatingSystem.current().getSharedLibraryName(ndiSdkInstall.resolve("Lib").resolve("x86"))
+            def ndiLibPath = OperatingSystem.current().getSharedLibraryName(ndiSdkPath.resolve("Lib").resolve("x86"))
         } else if (architectureName == MachineArchitecture.X86_64) {
-            def ndiLibPath = ndiSdkInstall.resolve("Lib").resolve("x64")
+            def ndiLibPath = ndiSdkPath.resolve("Lib").resolve("x64")
         } else {
             throw new GradleException("Unknown target platform: " + architectureName)
         }

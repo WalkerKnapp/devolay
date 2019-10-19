@@ -43,7 +43,7 @@ public class SendAudioExample {
         // Thirty seconds of samples
         final int totalSamplesToSend = sampleRate * 30;
 
-        int[] totalSamplesPerChannel = new int[4];
+        int[] totalSamplesPerChannel = new int[channelCount];
 
         for(int i = 0; i < totalSamplesToSend; i += sampleCount) {
             data.position(0);

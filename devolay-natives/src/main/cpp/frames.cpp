@@ -123,7 +123,7 @@ void Java_com_walker_devolay_DevolayVideoFrame_setYRes(JNIEnv *env, jclass jClaz
 
 void Java_com_walker_devolay_DevolayVideoFrame_setFourCCType(JNIEnv *env, jclass jClazz, jlong pFrame, jint j4CCType) {
     printf("setFourCCType\n");
-    reinterpret_cast<NDIlib_video_frame_v2_t *>(pFrame)->FourCC = j4CCType;
+    reinterpret_cast<NDIlib_video_frame_v2_t *>(pFrame)->FourCC = static_cast<NDIlib_FourCC_video_type_e>(j4CCType);
 }
 
 void Java_com_walker_devolay_DevolayVideoFrame_setFrameRateN(JNIEnv *env, jclass jClazz, jlong pFrame, jint jFrameRateN) {
@@ -143,7 +143,7 @@ void Java_com_walker_devolay_DevolayVideoFrame_setPictureAspectRatio(JNIEnv *env
 
 void Java_com_walker_devolay_DevolayVideoFrame_setFrameFormatType(JNIEnv *env, jclass jClazz, jlong pFrame, jint jFrameFormatType) {
     printf("setFrameFormatType\n");
-    reinterpret_cast<NDIlib_video_frame_v2_t *>(pFrame)->frame_format_type = jFrameFormatType;
+    reinterpret_cast<NDIlib_video_frame_v2_t *>(pFrame)->frame_format_type = static_cast<NDIlib_frame_format_type_e>(jFrameFormatType);
 }
 
 void Java_com_walker_devolay_DevolayVideoFrame_setTimecode(JNIEnv *env, jclass jClazz, jlong pFrame, jlong jTimecode) {

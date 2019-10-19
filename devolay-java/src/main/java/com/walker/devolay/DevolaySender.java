@@ -6,6 +6,7 @@ import java.lang.ref.Cleaner;
  * Equivalent to NDIlib_send_instance_t
  */
 public class DevolaySender implements AutoCloseable {
+
     static class State implements Runnable {
         private long structPointer;
 
@@ -67,6 +68,14 @@ public class DevolaySender implements AutoCloseable {
         sendAudioV2(ndilibSendInstancePointer, frame.structPointer);
     }
 
+    public void sendAudioFrameInterleaved16s(DevolayAudioFrameInterleaved16s frame) {
+        sendAudioInterleaved16s(ndilibSendInstancePointer, frame.structPointer);
+    }
+
+    public void sendAudioFrameInterleaved32s(DevolayAudioFrameInterleaved32s frame) {
+        sendAudioInterleaved32s(ndilibSendInstancePointer, frame.structPointer);
+    }
+
     public void sendMetadataFrame(DevolayMetadataFrame frame) {
         sendMetadata(ndilibSendInstancePointer, frame.structPointer);
     }
@@ -121,6 +130,8 @@ public class DevolaySender implements AutoCloseable {
     private static native void sendVideoAsyncV2(long sendInstance, long videoFrameInstance);
 
     private static native void sendAudioV2(long sendInstance, long audioFrameInstance);
+    private static native void sendAudioInterleaved16s(long sendInstance, long audioFrameInstance);
+    private static native void sendAudioInterleaved32s(long sendInstance, long audioFrameInstance);
 
     private static native void sendMetadata(long sendInstance, long metadataFrameInstance);
 

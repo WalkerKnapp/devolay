@@ -57,7 +57,6 @@ void Java_com_walker_devolay_DevolaySender_sendVideoV2(JNIEnv *env, jclass jClaz
 
 void Java_com_walker_devolay_DevolaySender_sendVideoAsyncV2(JNIEnv *env, jclass jClazz, jlong pSender, jlong pFrame) {
     printf("sendVideoAsyncV2\n");
-
     getNDILib()->NDIlib_send_send_video_async_v2(reinterpret_cast<NDIlib_send_instance_t>(pSender),
                                       reinterpret_cast<const NDIlib_video_frame_v2_t *>(pFrame));
 }
@@ -67,6 +66,16 @@ void Java_com_walker_devolay_DevolaySender_sendAudioV2(JNIEnv *env, jclass jClaz
 
     getNDILib()->NDIlib_send_send_audio_v2(reinterpret_cast<NDIlib_send_instance_t>(pSender),
                                       reinterpret_cast<const NDIlib_audio_frame_v2_t *>(pFrame));
+}
+
+void Java_com_walker_devolay_DevolaySender_sendAudioInterleaved16s(JNIEnv *env, jclass jClazz, jlong pSender, jlong pFrame) {
+    getNDILib()->NDIlib_util_send_send_audio_interleaved_16s(reinterpret_cast<NDIlib_send_instance_t>(pSender),
+                                                             reinterpret_cast<const NDIlib_audio_frame_interleaved_16s_t *>(pFrame));
+}
+
+void Java_com_walker_devolay_DevolaySender_sendAudioInterleaved32s(JNIEnv *env, jclass jClazz, jlong pSender, jlong pFrame) {
+    getNDILib()->NDIlib_util_send_send_audio_interleaved_32s(reinterpret_cast<NDIlib_send_instance_t>(pSender),
+                                                             reinterpret_cast<const NDIlib_audio_frame_interleaved_32s_t *>(pFrame));
 }
 
 void Java_com_walker_devolay_DevolaySender_sendMetadata(JNIEnv *env, jclass jClazz, jlong pSender, jlong pFrame) {

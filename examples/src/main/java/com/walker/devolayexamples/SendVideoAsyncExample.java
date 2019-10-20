@@ -6,28 +6,32 @@ import com.walker.devolay.DevolaySender;
 import com.walker.devolay.DevolayVideoFrame;
 
 import java.nio.ByteBuffer;
+import java.util.Scanner;
 
 /**
- * Adapted from NDIlib_Send_Video.cpp
+ * Adapted from NDIlib_Send_Video_Async.cpp
  */
-public class SendVideoExample {
+public class SendVideoAsyncExample {
     public static void main(String[] args) {
+        new Scanner(System.in).nextLine();
         Devolay.loadLibraries();
 
-        // Create the sender using the default settings, other than setting a name for the source.
         DevolaySender sender = new DevolaySender("Devolay Example Video");
 
         final int width = 1920;
         final int height = 1080;
-        // BGRX has a pixel depth of 4
-        final ByteBuffer data = ByteBuffer.allocateDirect(width * height * 4);
+        // BGRA has a pixel depth of 4
+        final int pixelDepth = 4;
 
-        // Create a video frame
         DevolayVideoFrame videoFrame = new DevolayVideoFrame();
         videoFrame.setResolution(width, height);
-        videoFrame.setFourCCType(DevolayFrameFourCCType.NDIlib_FourCC_type_BGRX);
-        videoFrame.setData(data);
+        videoFrame.setFourCCType(DevolayFrameFourCCType.NDIlib_FourCC_type_BGRA);
+        videoFrame.setLineStride(width * pixelDepth);
         videoFrame.setFrameRate(60, 1);
+
+        // Use two frame buffers because one will typically be in flight (being used by NDI send) while the other is being filled.
+        ByteBuffer[] frameBuffers = { ByteBuffer.allocateDirect(width * height * pixelDepth),
+                ByteBuffer.allocateDirect(width * height * pixelDepth) };
 
         int frameCounter = 0;
         long fpsPeriod = System.currentTimeMillis();
@@ -35,12 +39,17 @@ public class SendVideoExample {
         // Run for one minute
         long startTime = System.currentTimeMillis();
         while(System.currentTimeMillis() - startTime < 1000 * 60) {
+            // Use the buffer that currently isn't in flight
+            ByteBuffer buffer = frameBuffers[frameCounter & 1];
 
-            //Fill in the buffer for one frame.
-            fillFrame(width, height, frameCounter, data);
+            // Fill in the buffer for one frame.
+            fillFrame(width, height, frameCounter, buffer);
+            videoFrame.setData(buffer);
 
-            // Submit the frame. This is clocked by default, so it will be submitted at <= 60 fps.
-            sender.sendVideoFrame(videoFrame);
+            // Submit the frame asynchronously.
+            // This call will return immediately and the API will "own" the buffer until a synchronizing event.
+            // A synchronizing event is one of: DevolaySender#sendVideoFrameAsync, DevolaySender#sendVideoFrame, DevolaySender#close
+            sender.sendVideoFrameAsync(videoFrame);
 
             // Give an FPS message every 30 frames submitted
             if(frameCounter % 30 == 29) {

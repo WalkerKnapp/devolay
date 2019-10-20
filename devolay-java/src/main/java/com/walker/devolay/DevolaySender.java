@@ -108,7 +108,7 @@ public class DevolaySender implements AutoCloseable {
     /**
      * Creates a COPY of the DevolaySource struct for this sender.
      *
-     * @return
+     * @return A copy of the DevolaySource this sender is for.
      */
     public DevolaySource getSource() {
         return new DevolaySource(getSource(ndilibSendInstancePointer));

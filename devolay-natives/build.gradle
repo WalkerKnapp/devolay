@@ -23,6 +23,10 @@ library {
     }
 }
 
+assemble {
+    dependsOn ":devolay-java:generateJniHeaders"
+}
+
 // Include the JNI headers and link/include the NDI(tm) SDK
 components.main.binaries.whenElementFinalized { binary ->
     project.dependencies {

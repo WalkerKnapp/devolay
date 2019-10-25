@@ -8,9 +8,11 @@ plugins {
 group 'com.walker'
 version '1.0.0'
 
-sourceCompatibility = 9
+archivesBaseName = 'devolay'
 
-task generateJniHeaders(type: Exec, description: 'Generates C headers for JNI by running javah', group: 'build', dependsOn: classes) {
+sourceCompatibility = 1.8
+
+task generateJniHeaders(type: Exec, description: 'Generates C headers for JNI by running javah', group: 'build') {
     def nativeIncludes = "../devolay-natives/src/main/headers"
 
     ArrayList<String> javacCommand = new ArrayList<String>()

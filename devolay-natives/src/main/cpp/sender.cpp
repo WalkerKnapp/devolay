@@ -1,8 +1,6 @@
 #include <jni.h>
-#include <cstdio>
 
 #include <Processing.NDI.Lib.h>
-#include <vcruntime_typeinfo.h>
 #include <functional>
 
 #include "devolay.h"

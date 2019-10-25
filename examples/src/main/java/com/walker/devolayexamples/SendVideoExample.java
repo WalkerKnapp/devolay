@@ -25,7 +25,7 @@ public class SendVideoExample {
         // Create a video frame
         DevolayVideoFrame videoFrame = new DevolayVideoFrame();
         videoFrame.setResolution(width, height);
-        videoFrame.setFourCCType(DevolayFrameFourCCType.NDIlib_FourCC_type_BGRX);
+        videoFrame.setFourCCType(DevolayFrameFourCCType.BGRX);
         videoFrame.setData(data);
         videoFrame.setFrameRate(60, 1);
 

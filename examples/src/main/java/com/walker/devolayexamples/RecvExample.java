@@ -1,0 +1,70 @@
+package com.walker.devolayexamples;
+
+import com.walker.devolay.*;
+
+public class RecvExample {
+    public static void main(String[] args) {
+        Devolay.loadLibraries();
+
+        DevolayReceiver receiver = new DevolayReceiver();
+
+        // Create a finder
+        try(DevolayFinder finder = new DevolayFinder()) {
+            // Query for sources
+            DevolaySource[] sources;
+            while ((sources = finder.getCurrentSources()).length == 0) {
+                // If none found, wait until the list changes
+                System.out.println("Waiting for sources...");
+                finder.waitForSources(5000);
+            }
+
+            // Connect to the first source found
+            System.out.println("Connecting to source: " + sources[0].getSourceName());
+            receiver.connect(sources[0]);
+        }
+
+        // Create initial frames to be used for capturing
+        DevolayVideoFrame videoFrame = new DevolayVideoFrame();
+        DevolayAudioFrame audioFrame = new DevolayAudioFrame();
+        DevolayMetadataFrame metadataFrame = new DevolayMetadataFrame();
+
+        // Run for one minute
+        long startTime = System.currentTimeMillis();
+        while(System.currentTimeMillis() - startTime < 1000 * 60) {
+            // Capture with a timeout of 5000 milliseconds
+            switch (receiver.receiveCapture(videoFrame, audioFrame, metadataFrame, 5000)) {
+                case NONE:
+                    System.out.println("No data received.");
+                    break;
+                case VIDEO:
+                    System.out.println("Video data received (" + videoFrame.getXResolution() + "x" + videoFrame.getYResolution() + ", " +
+                            videoFrame.getFrameRateN() + "/" + videoFrame.getFrameRateD() + ").");
+
+                    videoFrame.close();
+                    videoFrame = new DevolayVideoFrame();
+                    break;
+                case AUDIO:
+                    System.out.println("Audio data received (" + audioFrame.getSamples() + ").");
+                    audioFrame.close();
+                    audioFrame = new DevolayAudioFrame();
+                    break;
+                case METADATA:
+                    System.out.println("Metadata received (" + metadataFrame.getData() + ").");
+                    metadataFrame.close();
+                    metadataFrame = new DevolayMetadataFrame();
+                    break;
+            }
+
+            if(receiver.getConnectionCount() < 1) {
+                System.out.println("Lost connection.");
+                break;
+            }
+        }
+
+        // Destroy the references to each. Not necessary, but can free up the memory faster than Java's GC by itself
+        videoFrame.close();
+        audioFrame.close();
+        metadataFrame.close();
+        receiver.close();
+    }
+}

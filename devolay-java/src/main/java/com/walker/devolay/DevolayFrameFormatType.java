@@ -22,4 +22,18 @@ public enum DevolayFrameFormatType {
     DevolayFrameFormatType(int id) {
         this.id = id;
     }
+
+    public static DevolayFrameFormatType valueOf(int id) {
+        if(id == PROGRESSIVE.id) {
+            return PROGRESSIVE;
+        } else if (id == INTERLEAVED.id) {
+            return INTERLEAVED;
+        } else if (id == FIELD_0.id) {
+            return FIELD_0;
+        } else if (id == FIELD_1.id) {
+            return FIELD_1;
+        } else {
+            throw new IllegalArgumentException("Unknown frame format id: " + id);
+        }
+    }
 }

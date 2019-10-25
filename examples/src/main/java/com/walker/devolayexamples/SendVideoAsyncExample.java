@@ -25,7 +25,7 @@ public class SendVideoAsyncExample {
 
         DevolayVideoFrame videoFrame = new DevolayVideoFrame();
         videoFrame.setResolution(width, height);
-        videoFrame.setFourCCType(DevolayFrameFourCCType.NDIlib_FourCC_type_BGRA);
+        videoFrame.setFourCCType(DevolayFrameFourCCType.BGRA);
         videoFrame.setLineStride(width * pixelDepth);
         videoFrame.setFrameRate(60, 1);
 

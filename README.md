@@ -47,3 +47,38 @@ In pom.xml:
 Devolay aims to be close to the original NDI SDK while still following Java standards and conventions. The vast majority of applications can be simply translated from NDI SDK calls to Devolay calls.
 
 Example can be found in [examples/src/main/java/com/walker/devolayexamples](https://github.com/WalkerKnapp/devolay/tree/master/examples/src/main/java/com/walker/devolayexamples).
+
+## Compiling
+Compiling is fairly simple, using Gradle's native build model.
+
+#### Requirements
+
+- [The NewTek NDI SDK (v4.0 or higher)](https://www.ndi.tv/sdk/)
+- [A Gradle-compatible C++ Toolchain](https://docs.gradle.org/current/userguide/building_cpp_projects.html#sec:cpp_supported_tool_chain)
+- Git
+
+#### Building
+
+Clone the repository, or download the zip archive and extract it:
+```
+> git clone --recurse-submodules -j8 https://github.com/WalkerKnapp/devolay.git 
+> cd devolay
+```
+
+Run the automatic assembly:
+```
+> ./gradlew assemble
+> ./gradlew install
+```
+
+The library output will now be in `devolay-java/build/libs` and installed in the local maven repository.
+The jar can either be used directly, or with gradle:
+```groovy
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+    implementation 'com.walker:devolay:VERSION'
+}
+```

@@ -3,4 +3,4 @@ plugins {
 }
 
 group 'com.walker'
-version '0.0.1'
+version '1.0.0'

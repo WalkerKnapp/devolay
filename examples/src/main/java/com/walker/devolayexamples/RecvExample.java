@@ -61,6 +61,12 @@ public class RecvExample {
             }
         }
 
+        try(DevolayPerformanceData performanceData = new DevolayPerformanceData()) {
+            receiver.queryPerformance(performanceData);
+            System.out.println("Dropped Video: " + performanceData.getDroppedVideoFrames() + "/" + performanceData.getTotalVideoFrames());
+            System.out.println("Dropped Audio: " + performanceData.getDroppedAudioFrames() + "/" + performanceData.getTotalAudioFrames());
+        }
+
         // Destroy the references to each. Not necessary, but can free up the memory faster than Java's GC by itself
         videoFrame.close();
         audioFrame.close();

@@ -23,7 +23,6 @@ const NDIlib_v3 *getNDILib() {
 }
 
 jint Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz) {
-    printf("nLoadLibraries\n");
     std::vector<std::string> locations;
     locations.emplace_back(getenv(NDILIB_REDIST_FOLDER));
 #if defined(__linux__) || defined(__APPLE__)

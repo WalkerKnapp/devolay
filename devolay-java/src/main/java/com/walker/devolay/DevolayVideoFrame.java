@@ -1,37 +1,20 @@
 package com.walker.devolay;
 
-import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DevolayVideoFrame implements AutoCloseable {
 
-    static class State implements Runnable {
-        private long structPointer;
-
-        State(long pointer) {
-            this.structPointer = pointer;
-        }
-
-        public void run() {
-            destroyVideoFrame(structPointer);
-        }
-    }
-
-    private final State state;
-    private final Cleaner.Cleanable cleanable;
     final long structPointer;
 
     // set when a buffer is allocated by a receiver that later needs to be freed w/ that receiver.
     AtomicReference<DevolayReceiver> allocatedBufferSource = new AtomicReference<>();
 
     public DevolayVideoFrame() {
-        this.structPointer = createNewVideoFrameDefaultSettings();
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
 
-        this.state = new State(structPointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
+        this.structPointer = createNewVideoFrameDefaultSettings();
     }
 
     public void setResolution(int width, int height) {
@@ -120,7 +103,8 @@ public class DevolayVideoFrame implements AutoCloseable {
         if(allocatedBufferSource.get() != null) {
             allocatedBufferSource.getAndSet(null).freeVideo(this);
         }
-        cleanable.clean();
+        // TODO: Auto-clean resources.
+        destroyVideoFrame(structPointer);
     }
 
     // Native Functions

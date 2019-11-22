@@ -1,26 +1,10 @@
 package com.walker.devolay;
 
-import java.lang.ref.Cleaner;
-
 /**
  * Equivalent to NDIlib_send_instance_t
  */
 public class DevolaySender implements AutoCloseable {
 
-    static class State implements Runnable {
-        private long structPointer;
-
-        State(long pointer) {
-            this.structPointer = pointer;
-        }
-
-        public void run() {
-            sendDestroy(structPointer);
-        }
-    }
-
-    private final State state;
-    private final Cleaner.Cleanable cleanable;
     /**
      * Holds the reference to the NDIlib_send_instance_t object
      */
@@ -35,10 +19,10 @@ public class DevolaySender implements AutoCloseable {
      * @param clockAudio A "rate-limiting" when you submit frames to match the current framerate. See Processing.NDI.Send.h
      */
     public DevolaySender(String ndiName, String groups, boolean clockVideo, boolean clockAudio) {
-        this.ndilibSendInstancePointer = sendCreate(ndiName, groups, clockVideo, clockAudio);
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
 
-        this.state = new State(ndilibSendInstancePointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
+        this.ndilibSendInstancePointer = sendCreate(ndiName, groups, clockVideo, clockAudio);
     }
 
     public DevolaySender(String ndiName, String groups) {
@@ -51,9 +35,6 @@ public class DevolaySender implements AutoCloseable {
 
     public DevolaySender() {
         this.ndilibSendInstancePointer = sendCreateDefaultSettings();
-
-        this.state = new State(ndilibSendInstancePointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
     }
 
     public void sendVideoFrame(DevolayVideoFrame frame) {
@@ -116,7 +97,8 @@ public class DevolaySender implements AutoCloseable {
 
     @Override
     public void close() {
-        cleanable.clean();
+        // TODO: Auto-clean resources.
+        sendDestroy(ndilibSendInstancePointer);
     }
 
     // Native Methods

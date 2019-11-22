@@ -19,3 +19,13 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
+task executeSendAudioExample(type:JavaExec) {
+    main = "com.walker.devolayexamples.SendAudioExample"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task executeRecvExample(type:JavaExec) {
+    main = "com.walker.devolayexamples.RecvExample"
+    classpath = sourceSets.main.runtimeClasspath
+}

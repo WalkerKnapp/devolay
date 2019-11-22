@@ -1,32 +1,16 @@
 package com.walker.devolay;
 
-import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
 
 public class DevolayAudioFrameInterleaved16s implements AutoCloseable {
 
-    static class State implements Runnable {
-        private long structPointer;
-
-        State(long pointer) {
-            this.structPointer = pointer;
-        }
-
-        public void run() {
-            destroyAudioFrameInterleaved16s(structPointer);
-        }
-    }
-
-
-    private final DevolayAudioFrame.State state;
-    private final Cleaner.Cleanable cleanable;
     final long structPointer;
 
     public DevolayAudioFrameInterleaved16s() {
-        this.structPointer = createNewAudioFrameInterleaved16sDefaultSettings();
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
 
-        this.state = new DevolayAudioFrame.State(structPointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
+        this.structPointer = createNewAudioFrameInterleaved16sDefaultSettings();
     }
 
     public void setSampleRate(int sampleRate) {
@@ -73,7 +57,8 @@ public class DevolayAudioFrameInterleaved16s implements AutoCloseable {
 
     @Override
     public void close() {
-        cleanable.clean();
+        // TODO: Auto-clean resources.
+        destroyAudioFrameInterleaved16s(structPointer);
     }
 
     // Native Methods

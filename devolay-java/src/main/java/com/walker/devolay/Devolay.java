@@ -2,7 +2,6 @@ package com.walker.devolay;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.Cleaner;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -10,14 +9,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Devolay {
 
-    public static final Cleaner cleaner = Cleaner.create();
-
     private static AtomicBoolean librariesLoaded = new AtomicBoolean(false);
 
     static {
         try(InputStream is = Devolay.class.getResourceAsStream("/devolay-natives.dll")) {
             Path tempPath = Files.createTempFile("devolay-natives", ".dll");
-            Files.copy(is, tempPath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println(tempPath.toAbsolutePath().toString());
+            long b = Files.copy(is, tempPath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println(b);
             System.load(tempPath.toAbsolutePath().toString());
         } catch (IOException e) {
             throw new IllegalStateException(e);

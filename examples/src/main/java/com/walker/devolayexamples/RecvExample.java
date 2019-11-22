@@ -44,7 +44,7 @@ public class RecvExample {
                     videoFrame = new DevolayVideoFrame();
                     break;
                 case AUDIO:
-                    System.out.println("Audio data received (" + audioFrame.getSamples() + ").");
+                    System.out.println("Audio data received (" + audioFrame.getSamples() + ", " + audioFrame.getChannelStride() + ").");
                     audioFrame.close();
                     audioFrame = new DevolayAudioFrame();
                     break;

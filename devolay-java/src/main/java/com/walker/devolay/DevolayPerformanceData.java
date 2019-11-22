@@ -1,35 +1,16 @@
 package com.walker.devolay;
 
-import java.lang.ref.Cleaner;
-
 public class DevolayPerformanceData implements AutoCloseable {
-    static class State implements Runnable {
-        private long totalStructPointer;
-        private long droppedStructPointer;
-
-        State(long totalPointer, long droppedPointer) {
-            this.totalStructPointer = totalPointer;
-            this.droppedStructPointer = droppedPointer;
-        }
-
-        public void run() {
-            destroyPerformanceStruct(totalStructPointer);
-            destroyPerformanceStruct(droppedStructPointer);
-        }
-    }
-
-    private final State state;
-    private final Cleaner.Cleanable cleanable;
 
     final long totalPerformanceStructPointer;
     final long droppedPerformanceStructPointer;
 
     public DevolayPerformanceData() {
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
+
         this.totalPerformanceStructPointer = createPerformanceStruct();
         this.droppedPerformanceStructPointer = createPerformanceStruct();
-
-        this.state = new State(totalPerformanceStructPointer, droppedPerformanceStructPointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
     }
 
     public long getTotalVideoFrames() {
@@ -58,7 +39,9 @@ public class DevolayPerformanceData implements AutoCloseable {
 
     @Override
     public void close() {
-        cleanable.clean();
+        // TODO: Auto-clean resources.
+        destroyPerformanceStruct(totalPerformanceStructPointer);
+        destroyPerformanceStruct(droppedPerformanceStructPointer);
     }
 
     // Native Methods

@@ -1,0 +1,6 @@
+/devolay-natives/build/
+/devolay-java/build/
+/devolay-natives/src/main/headers/
+/examples/build/
+/.gradle/
+/.idea/

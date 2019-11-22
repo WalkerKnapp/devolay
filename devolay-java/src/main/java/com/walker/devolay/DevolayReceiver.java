@@ -1,7 +1,5 @@
 package com.walker.devolay;
 
-import java.lang.ref.Cleaner;
-
 public class DevolayReceiver implements AutoCloseable {
     // Receive only metadata
     public static final int RECEIVE_BANDWIDTH_METADATA_ONLY = -10;
@@ -59,30 +57,16 @@ public class DevolayReceiver implements AutoCloseable {
         }
     }
 
-    static class State implements Runnable {
-        private long structPointer;
-
-        State(long pointer) {
-            this.structPointer = pointer;
-        }
-
-        public void run() {
-            receiveDestroy(structPointer);
-        }
-    }
-
-    private final State state;
-    private final Cleaner.Cleanable cleanable;
     /**
      * Holds the reference to the NDIlib_send_instance_t object
      */
     private final long ndilibRecievePointer;
 
     public DevolayReceiver(DevolaySource source, ColorFormat colorFormat, int receiveBandwidth, boolean allowVideoFields, String name) {
-        this.ndilibRecievePointer = receiveCreate(source.structPointer, colorFormat.id, receiveBandwidth, allowVideoFields, name);
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
 
-        this.state = new State(ndilibRecievePointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
+        this.ndilibRecievePointer = receiveCreate(source.structPointer, colorFormat.id, receiveBandwidth, allowVideoFields, name);
     }
 
     public DevolayReceiver(DevolaySource source) {
@@ -90,10 +74,10 @@ public class DevolayReceiver implements AutoCloseable {
     }
 
     public DevolayReceiver() {
-        this.ndilibRecievePointer = receiveCreateDefaultSettings();
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
 
-        this.state = new State(ndilibRecievePointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
+        this.ndilibRecievePointer = receiveCreateDefaultSettings();
     }
 
     /**
@@ -215,7 +199,8 @@ public class DevolayReceiver implements AutoCloseable {
 
     @Override
     public void close() {
-        cleanable.clean();
+        // TODO: Auto-clean resources.
+        receiveDestroy(ndilibRecievePointer);
     }
 
     void freeVideo(DevolayVideoFrame frame) {

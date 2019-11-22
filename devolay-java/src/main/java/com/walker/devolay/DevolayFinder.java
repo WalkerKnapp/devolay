@@ -1,23 +1,6 @@
 package com.walker.devolay;
 
-import java.awt.desktop.SystemSleepEvent;
-import java.lang.ref.Cleaner;
-
 public class DevolayFinder implements AutoCloseable {
-    static class State implements Runnable {
-        private long structPointer;
-
-        State(long pointer) {
-            this.structPointer = pointer;
-        }
-
-        public void run() {
-            findDestroy(structPointer);
-        }
-    }
-
-    private final State state;
-    private final Cleaner.Cleanable cleanable;
     /**
      * Holds the reference to the NDIlib_find_instance_t object
      */
@@ -33,10 +16,10 @@ public class DevolayFinder implements AutoCloseable {
      * @param extraIps A comma-separated list of IP addresses NDI should additionally query for. See Processing.NDI.Find.h
      */
     public DevolayFinder(boolean showLocalSources, String groups, String extraIps) {
-        this.ndiLibFindInstancePointer = findCreate(showLocalSources, groups, extraIps);
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
 
-        this.state = new State(ndiLibFindInstancePointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
+        this.ndiLibFindInstancePointer = findCreate(showLocalSources, groups, extraIps);
     }
 
     public DevolayFinder(boolean showLocalSources, String groups) {
@@ -48,10 +31,10 @@ public class DevolayFinder implements AutoCloseable {
     }
 
     public DevolayFinder() {
-        this.ndiLibFindInstancePointer = findCreateDefaultSettings();
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
 
-        this.state = new State(ndiLibFindInstancePointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
+        this.ndiLibFindInstancePointer = findCreateDefaultSettings();
     }
 
     /**
@@ -95,7 +78,8 @@ public class DevolayFinder implements AutoCloseable {
                 prev.close();
             }
         }
-        cleanable.clean();
+        // TODO: Auto-clean resources.
+        findDestroy(ndiLibFindInstancePointer);
     }
 
     // Native Methods

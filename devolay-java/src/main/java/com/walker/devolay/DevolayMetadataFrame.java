@@ -1,36 +1,19 @@
 package com.walker.devolay;
 
-import java.lang.ref.Cleaner;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DevolayMetadataFrame implements AutoCloseable {
 
-    static class State implements Runnable {
-        private long structPointer;
-
-        State(long pointer) {
-            this.structPointer = pointer;
-        }
-
-        public void run() {
-            destroyMetadataFrame(structPointer);
-        }
-    }
-
-
-    private final State state;
-    private final Cleaner.Cleanable cleanable;
     final long structPointer;
 
     // set when a buffer is allocated by a receiver that later needs to be freed w/ that receiver.
     AtomicReference<DevolayReceiver> allocatedBufferSource = new AtomicReference<>();
 
     public DevolayMetadataFrame() {
-        this.structPointer = createNewMetadataFrameDefaultSettings();
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
 
-        this.state = new State(structPointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
+        this.structPointer = createNewMetadataFrameDefaultSettings();
     }
 
     public String getData() {
@@ -57,7 +40,8 @@ public class DevolayMetadataFrame implements AutoCloseable {
         if(allocatedBufferSource.get() != null) {
             allocatedBufferSource.getAndSet(null).freeMetadata(this);
         }
-        cleanable.clean();
+        // TODO: Auto-clean resources.
+        destroyMetadataFrame(structPointer);
     }
 
     // Native Methods

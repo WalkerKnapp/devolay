@@ -1,37 +1,23 @@
 package com.walker.devolay;
 
-import java.lang.ref.Cleaner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DevolaySource implements AutoCloseable {
 
-    static class State implements Runnable {
-        private long structPointer;
-        public AtomicBoolean isClosed = new AtomicBoolean(false);
+    private final AtomicBoolean isClosed;
 
-        State(long pointer) {
-            this.structPointer = pointer;
-        }
-
-        public void run() {
-            isClosed.set(true);
-            deallocSource(structPointer);
-        }
-    }
-
-    private final State state;
-    private final Cleaner.Cleanable cleanable;
     final long structPointer;
 
     DevolaySource(long pointer) {
-        this.structPointer = pointer;
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
 
-        this.state = new State(structPointer);
-        this.cleanable = Devolay.cleaner.register(this, state);
+        this.isClosed = new AtomicBoolean(false);
+        this.structPointer = pointer;
     }
 
     public String getSourceName() {
-        if(state.isClosed.get()) {
+        if(isClosed.get()) {
             throw new IllegalStateException("Cannot access attribute of closed DevolaySource. Please read the javadocs for DevolayFinder#getCurrentSources");
         }
         return getSourceName(structPointer);
@@ -39,7 +25,10 @@ public class DevolaySource implements AutoCloseable {
 
     @Override
     public void close() {
-        cleanable.clean();
+        // TODO: Auto-clean resources.
+        deallocSource(structPointer);
+
+        isClosed.set(true);
     }
 
     private static native void deallocSource(long pointer);

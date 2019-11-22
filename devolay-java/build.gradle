@@ -25,27 +25,28 @@ task javadocJar(type: Jar) {
 
 // Load keys.properties and configure bintray for deploy
 final Properties keysProperties = new Properties()
-if(Files.exists(Paths.get("keys.properties"))) {
-    new FileReader("keys.properties").with( { reader ->
+if(project.file("keys.properties").exists()) {
+    new FileReader(project.file("keys.properties")).with( { reader ->
         keysProperties.load(reader)
     })
 }
 
+System.out.println(keysProperties.getProperty("bintray_user"))
 
 bintray {
     user = keysProperties.getProperty("bintray_user")
     key = keysProperties.getProperty("bintray_api_key")
     pkg {
-        repo = 'maven'
+        repo = 'devolay'
         name = 'devolay'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/WalkerKnapp/devolay.git'
 
         version {
-            name = version
-            desc = 'Devolay Library ' + version + ' Release'
+            name = project.version
+            desc = 'Devolay Library ' + project.version + ' Release'
             released = new Date()
-            vcsTag = 'v' + version
+            vcsTag = 'v' + project.version
         }
     }
     publications = ['Devolay']

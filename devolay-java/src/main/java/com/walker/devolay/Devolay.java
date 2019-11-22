@@ -12,11 +12,17 @@ public class Devolay {
     private static AtomicBoolean librariesLoaded = new AtomicBoolean(false);
 
     static {
-        try(InputStream is = Devolay.class.getResourceAsStream("/devolay-natives.dll")) {
-            Path tempPath = Files.createTempFile("devolay-natives", ".dll");
-            System.out.println(tempPath.toAbsolutePath().toString());
-            long b = Files.copy(is, tempPath, StandardCopyOption.REPLACE_EXISTING);
-            System.out.println(b);
+        final String libraryName = System.mapLibraryName("devolay-natives");
+        final String libraryExtension = libraryName.substring(libraryName.indexOf('.'));
+
+        try(InputStream is = Devolay.class.getResourceAsStream("/" + libraryName)) {
+
+            if(is == null) {
+                throw new IllegalStateException("This build of Devolay is not compiled for your OS. Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.");
+            }
+
+            Path tempPath = Files.createTempFile("devolay-natives", libraryExtension);
+            Files.copy(is, tempPath, StandardCopyOption.REPLACE_EXISTING);
             System.load(tempPath.toAbsolutePath().toString());
         } catch (IOException e) {
             throw new IllegalStateException(e);

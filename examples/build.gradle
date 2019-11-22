@@ -3,9 +3,6 @@ plugins {
     id 'application'
 }
 
-group 'com.walker'
-version '1.0.0'
-
 sourceCompatibility = 9
 mainClassName = 'com.walker.devolayexamples.SendAudioExample'
 

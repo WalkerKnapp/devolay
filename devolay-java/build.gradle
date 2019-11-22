@@ -1,16 +1,92 @@
 import org.gradle.internal.jvm.Jvm
 
-plugins {
-    id 'java'
-    id 'maven'
-}
+import java.nio.file.Files
+import java.nio.file.Paths
 
-group 'com.walker'
-version '1.0.0'
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id "com.jfrog.bintray" version "1.8.4"
+}
 
 archivesBaseName = 'devolay'
 
 sourceCompatibility = 1.8
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = "sources"
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier = 'javadoc'
+}
+
+// Load keys.properties and configure bintray for deploy
+final Properties keysProperties = new Properties()
+if(Files.exists(Paths.get("keys.properties"))) {
+    new FileReader("keys.properties").with( { reader ->
+        keysProperties.load(reader)
+    })
+}
+
+
+bintray {
+    user = keysProperties.getProperty("bintray_user")
+    key = keysProperties.getProperty("bintray_api_key")
+    pkg {
+        repo = 'maven'
+        name = 'devolay'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/WalkerKnapp/devolay.git'
+
+        version {
+            name = version
+            desc = 'Devolay Library ' + version + ' Release'
+            released = new Date()
+            vcsTag = 'v' + version
+        }
+    }
+    publications = ['Devolay']
+}
+
+publishing {
+    publications {
+        Devolay(MavenPublication) {
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+
+            groupId groupId
+            artifactId = 'devolay'
+            version version
+
+            pom {
+                name = "devolay"
+                description = "A Java binding for the Newtek NDI(tm) SDK."
+                url = "https://github.com/WalkerKnapp/devolay"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "WalkerKnapp"
+                        name = "Walker Knapp"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/WalkerKnapp/devolay.git"
+                    developerConnection = "scm:git:git@github.com:WalkerKnapp/devolay.git"
+                    url = "https://github.com/WalkerKnapp/devolay"
+                }
+            }
+        }
+    }
+}
 
 task generateJniHeaders(type: Exec, description: 'Generates C headers for JNI by running javah', group: 'build') {
     def nativeIncludes = "../devolay-natives/src/main/headers"
@@ -27,14 +103,6 @@ task generateJniHeaders(type: Exec, description: 'Generates C headers for JNI by
     })
 
     commandLine javacCommand.toArray()
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 processResources {

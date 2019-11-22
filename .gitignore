@@ -1,6 +1,6 @@
-/devolay-natives/build/
-/devolay-java/build/
-/devolay-natives/src/main/headers/
-/examples/build/
+*/build/
 /.gradle/
 /.idea/
+
+/devolay-natives/src/main/headers/
+/devolay-java/keys.properties

@@ -104,6 +104,8 @@ public class DevolayReceiver implements AutoCloseable {
      * @param audioFrame A audio frame to put data into. Any existing data will be replaced. If null, audio will not be captured.
      * @param metadataFrame A metadata frame to put data into. Any existing data will be replaced. If null, metadata will not be captured.
      * @param timeout A timeout in milliseconds for the capture
+     *
+     * @return The frame type that was captured, DevolayFrameType#NONE, or DevolayFrameType#ERROR
      */
     public DevolayFrameType receiveCapture(DevolayVideoFrame videoFrame, DevolayAudioFrame audioFrame, DevolayMetadataFrame metadataFrame, int timeout) {
         int type = receiveCaptureV2(ndilibRecievePointer,

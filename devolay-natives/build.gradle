@@ -6,9 +6,6 @@ plugins {
     id 'cpp-library'
 }
 
-group 'com.walker'
-version '1.0.0'
-
 library {
     binaries.configureEach {
         // Force the CPP library to build C instead

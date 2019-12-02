@@ -4,7 +4,7 @@ Java bindings for the Newtek NDI(tm) SDK. For more information about NDI(tm), se
 http://NDI.NewTek.com/
 
 ## Download / Installation
-Currently, devolay is distrubuted using Bintray and only has windows builds. If a build is needed for Linux or MacOS, see Compiling. If anyone needs a public build of this library for those platforms, [open an issue](https://github.com/WalkerKnapp/devolay/issues) and I can try to release builds in the next version.
+Currently, Devolay is only actively tested on Windows, but as of v1.1.1, builds now are bundled with binaries for Windows, MacOS, and Linux. If you have any issues with these, [open an issue](https://github.com/WalkerKnapp/devolay/issues) so they can be resolved in the next version.
 
 ### Gradle
 ```groovy

@@ -1,9 +1,7 @@
+#include "devolay.h"
 #include <jni.h>
-
 #include <Processing.NDI.Lib.h>
 #include <functional>
-
-#include "devolay.h"
 
 #include "../headers/com_walker_devolay_DevolaySender.h"
 

@@ -44,7 +44,14 @@ components.main.binaries.whenElementFinalized { binary ->
         }
 
         def ndiSdkPath = file(System.getenv("NDI_SDK_DIR")).toPath();
-        def ndiIncludePath = ndiSdkPath.resolve("Include")
+        def ndiIncludePath
+	if(Files.exists(ndiSdkPath.resolve("Include"))) {
+	    ndiIncludePath = ndiSdkPath.resolve("Include")
+	} else if(Files.exists(ndiSdkPath.resolve("include"))) {
+	    ndiIncludePath = ndiSdkPath.resolve("include")
+	} else {
+	    throw new IllegalStateException("Could not find NDI Include folder. Check your NDI install and your NDI_SDK_DIR environment variable.")
+	}
         
         def architectureName = binary.getTargetPlatform().getTargetMachine().getArchitecture().getName() 
         

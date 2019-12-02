@@ -1,3 +1,5 @@
+#include "devolay.h"
+
 #include <jni.h>
 #include <cstdio>
 

@@ -1,5 +1,5 @@
-#include <Processing.NDI.Lib.h>
 #include "devolay.h"
+#include <Processing.NDI.Lib.h>
 
 #include "com_walker_devolay_DevolayFinder.h"
 

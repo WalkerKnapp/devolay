@@ -12,10 +12,10 @@ library {
         def compileTask = compileTask.get()
         //compileTask.source.from fileTree(dir: "src/main/c", include: "*\*\/*.c")
         if (toolChain instanceof VisualCpp) {
-            compileTask.compilerArgs = ["/std:c++latest"]
+            compileTask.compilerArgs.add("/std:c++latest")
         } else if (toolChain instanceof GccCompatibleToolChain) {
-            compileTask.compilerArgs = ["-std=c++17"]
-            compileTask.compilerArgs = ["-lstdc++fs"]
+            compileTask.compilerArgs.add("-std=c++17")
+            compileTask.compilerArgs.add("-lstdc++fs")
         }
     }
 }

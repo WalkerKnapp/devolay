@@ -24,10 +24,15 @@ const NDIlib_v3 *getNDILib() {
 
 jint Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz) {
     std::vector<std::string> locations;
-    locations.emplace_back(getenv(NDILIB_REDIST_FOLDER));
+
+    char *redistFolder = getenv(NDILIB_REDIST_FOLDER);
+    if(redistFolder != nullptr) {
+        locations.emplace_back(std::string(redistFolder));
+    }
+
 #if defined(__linux__) || defined(__APPLE__)
     locations.emplace_back("/usr/lib");
-    locations.emplace_back("/usr/local/lib")
+    locations.emplace_back("/usr/local/lib");
 #endif
 
     for(const std::string& possiblePath : locations) {

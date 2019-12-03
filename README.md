@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.walker:devolay:1.1.0'
+    implementation 'com.walker:devolay:1.1.1'
 }
 ```
 
@@ -38,7 +38,7 @@ In pom.xml:
 <dependency>
   <groupId>com.walker</groupId>
   <artifactId>devolay</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <type>pom</type>
 </dependency>
 ```

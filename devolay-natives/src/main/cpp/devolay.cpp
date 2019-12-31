@@ -1,21 +1,21 @@
-#include <jni.h>
-#include <cstdio>
-#include <cstdlib>
-#include <filesystem>
-#include <atomic>
-
 #include "devolay.h"
 
-#define BOOST_DLL_USE_STD_FS
-#define _CPPUNWIND
-#include <boost/dll.hpp>
+#include <cstdio>
+#include <cstdlib>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <stdlib.h>
+#include <dlfcn.h>
+#endif
+
+#include <filesystem>
 
 #include "../headers/com_walker_devolay_Devolay.h"
 
-namespace fs = boost::dll::fs;
+namespace fs = std::filesystem;
 
-//static std::shared_ptr<NDIlib_v3> ndiLib;
-static boost::dll::shared_library *ndiLibraryRef = nullptr;
 static const NDIlib_v3 *ndiLib = (NDIlib_v3 *)calloc(1, sizeof(NDIlib_v3));
 
 const NDIlib_v3 *getNDILib() {
@@ -37,19 +37,21 @@ jint Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz)
 
     for(const std::string& possiblePath : locations) {
         fs::path possibleLibPath(possiblePath);
-        possibleLibPath += "/";
+        //possibleLibPath += "/";
         possibleLibPath += NDILIB_LIBRARY_NAME;
 
-        printf("Testing for NDI at %s\n", possibleLibPath.string().c_str());
+        printf("Testing for NDI at %s\n", possibleLibPath.c_str());
 
         if(fs::exists(possibleLibPath) && fs::is_regular_file(possibleLibPath)) {
-            printf("Found NDI library at '%s'\n", possibleLibPath.string().c_str());
+            printf("Found NDI library at '%s'\n", possibleLibPath.c_str());
 
-            ndiLibraryRef = new boost::dll::shared_library(possibleLibPath);
+            // Load NDI library
+#ifdef _WIN32
+            HMODULE hNDILib = LoadLibraryA(possibleLibPath.c_str());
 
-            if(ndiLibraryRef) {
+            if(hNDILib) {
                 const NDIlib_v3* (*NDIlib_v3_load)(void) = NULL;
-                NDIlib_v3_load = ndiLibraryRef->get<const NDIlib_v3 *()>("NDIlib_v3_load");
+                *((FARPROC*)&NDIlib_v3_load) = GetProcAddress(hNDILib, "NDIlib_v3_load");
 
                 if (NDIlib_v3_load != nullptr) {
                     ndiLib = NDIlib_v3_load();
@@ -57,12 +59,36 @@ jint Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz)
                     ndiLib->NDIlib_initialize();
                     return 0;
                 } else {
+                    FreeLibrary(hNDILib);
+
                     printf("Failed to load NDI_v3_load function.");
                     return -2;
                 }
             } else {
                 printf("Library failed to load.");
             }
+#else
+            void *hNDILib = dlopen(possibleLibPath.c_str(), RTLD_LOCAL | RTLD_LAZY);
+
+            if(hNDILib) {
+                const NDIlib_v3* (*NDIlib_v3_load)(void) = NULL;
+                *((void**)&NDIlib_v3_load) = dlsym(hNDILib, "NDIlib_v3_load");
+
+                if (NDIlib_v3_load != nullptr) {
+                    ndiLib = NDIlib_v3_load();
+
+                    ndiLib->NDIlib_initialize();
+                    return 0;
+                } else {
+                    dlclose(hNDILib);
+
+                    printf("Failed to load NDI_v3_load function.");
+                    return -2;
+                }
+            } else {
+                printf("Library failed to load.");
+            }
+#endif
         }
     }
 

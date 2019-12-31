@@ -1,8 +1,5 @@
 #include "devolay.h"
 
-#include <jni.h>
-#include <Processing.NDI.Lib.h>
-
 #include "com_walker_devolay_DevolayPerformanceData.h"
 
 jlong Java_com_walker_devolay_DevolayPerformanceData_createPerformanceStruct(JNIEnv *env, jclass jClazz) {

@@ -10,12 +10,16 @@ library {
     binaries.configureEach {
         // Force the CPP library to build C instead
         def compileTask = compileTask.get()
+        def linkExecutable = linkTask.get()
         //compileTask.source.from fileTree(dir: "src/main/c", include: "*\*\/*.c")
+
         if (toolChain instanceof VisualCpp) {
             compileTask.compilerArgs.add("/std:c++latest")
         } else if (toolChain instanceof GccCompatibleToolChain) {
             compileTask.compilerArgs.add("-std=c++17")
             compileTask.compilerArgs.add("-lstdc++fs")
+
+            linkExecutable.linkerArgs.add("-lstdc++fs")
         }
     }
 }
@@ -40,18 +44,19 @@ components.main.binaries.whenElementFinalized { binary ->
         System.out.println("Linking/Including NDI(tm) SDK Path")
         
         if(System.getenv("NDI_SDK_DIR") == null) {
-             throw new IllegalStateException("NDI SDK not found: NDI_SDK_DIR environment variable does not exist.")
+            throw new IllegalStateException("NDI SDK not found: NDI_SDK_DIR environment variable does not exist.")
         }
 
         def ndiSdkPath = file(System.getenv("NDI_SDK_DIR")).toPath();
         def ndiIncludePath
-	if(Files.exists(ndiSdkPath.resolve("Include"))) {
-	    ndiIncludePath = ndiSdkPath.resolve("Include")
-	} else if(Files.exists(ndiSdkPath.resolve("include"))) {
-	    ndiIncludePath = ndiSdkPath.resolve("include")
-	} else {
-	    throw new IllegalStateException("Could not find NDI Include folder. Check your NDI install and your NDI_SDK_DIR environment variable.")
-	}
+
+        if(Files.exists(ndiSdkPath.resolve("Include"))) {
+            ndiIncludePath = ndiSdkPath.resolve("Include")
+        } else if(Files.exists(ndiSdkPath.resolve("include"))) {
+            ndiIncludePath = ndiSdkPath.resolve("include")
+        } else {
+            throw new IllegalStateException("Could not find NDI Include folder. Check your NDI install and your NDI_SDK_DIR environment variable.")
+        }
         
         def architectureName = binary.getTargetPlatform().getTargetMachine().getArchitecture().getName() 
         

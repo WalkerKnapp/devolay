@@ -98,11 +98,19 @@ public class DevolayVideoFrame implements AutoCloseable {
         return getData(structPointer);
     }
 
-    @Override
-    public void close() {
+    /**
+     * If a buffer is allocated by a Devolay process (DevolayReceiver#receiveCapture), free the buffer.
+     * This allows a previously used frame to be reused in DevolayReceiver#receiveCapture
+     */
+    public void freeBuffer() {
         if(allocatedBufferSource.get() != null) {
             allocatedBufferSource.getAndSet(null).freeVideo(this);
         }
+    }
+
+    @Override
+    public void close() {
+        freeBuffer();
         // TODO: Auto-clean resources.
         destroyVideoFrame(structPointer);
     }

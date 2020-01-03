@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation project(":devolay-java")
+    implementation group: 'org.bytedeco', name: 'ffmpeg-platform', version: '4.2.1-1.5.2'
     //runtimeOnly project(":devolay-natives")
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -24,5 +25,20 @@ task executeSendAudioExample(type:JavaExec) {
 
 task executeRecvExample(type:JavaExec) {
     main = "com.walker.devolayexamples.RecvExample"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task executeSendVideoExample(type:JavaExec) {
+    main = "com.walker.devolayexamples.SendVideoExample"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task executeRecordingExample(type:JavaExec) {
+    main = "com.walker.devolayexamples.recording.RecordingExample"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task monitorExample(type:JavaExec) {
+    main = "com.walker.devolayexamples.MonitorExample"
     classpath = sourceSets.main.runtimeClasspath
 }

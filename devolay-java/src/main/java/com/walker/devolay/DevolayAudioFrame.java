@@ -66,6 +66,14 @@ public class DevolayAudioFrame implements AutoCloseable {
         return getTimestamp(structPointer);
     }
 
+    /**
+     * Sets the audio data to a floating-point, planar DIRECT buffer.
+     *
+     * Most audio will consist of interleaved data, so should use DevolayUtilities.interleavedFloatToPlanarFloat
+     * before setting.
+     *
+     * @param data A planar ByteBuffer of floating point samples. MUST be a direct ByteBuffer.
+     */
     public void setData(ByteBuffer data) {
         if(allocatedBufferSource.get() != null) {
             allocatedBufferSource.getAndSet(null).freeAudio(this);
@@ -76,11 +84,18 @@ public class DevolayAudioFrame implements AutoCloseable {
         return getData(structPointer);
     }
 
-    @Override
-    public void close() {
+    /**
+     * If a buffer is allocated by a Devolay process (DevolayReceiver#receiveCapture), free the buffer.
+     * This allows a previously used frame to be reused in DevolayReceiver#receiveCapture
+     */
+    public void freeBuffer() {
         if(allocatedBufferSource.get() != null) {
             allocatedBufferSource.getAndSet(null).freeAudio(this);
         }
+    }
+
+    @Override
+    public void close() {
         // TODO: Auto-clean resources.
         destroyAudioFrame(structPointer);
     }

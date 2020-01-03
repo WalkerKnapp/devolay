@@ -35,6 +35,16 @@ public class DevolayMetadataFrame implements AutoCloseable {
         setTimecode(structPointer, timecode);
     }
 
+    /**
+     * If a buffer is allocated by a Devolay process (DevolayReceiver#receiveCapture), free the buffer.
+     * This allows a previously used frame to be reused in DevolayReceiver#receiveCapture
+     */
+    public void freeBuffer() {
+        if(allocatedBufferSource.get() != null) {
+            allocatedBufferSource.getAndSet(null).freeMetadata(this);
+        }
+    }
+
     @Override
     public void close() {
         if(allocatedBufferSource.get() != null) {

@@ -21,7 +21,7 @@ library {
 
             compileTask.compilerArgs.add("-static")
 
-            linkExecutable.linkerArgs.add("-lstdc++fs")
+            //linkExecutable.linkerArgs.add("-lstdc++fs")
         }
     }
 }

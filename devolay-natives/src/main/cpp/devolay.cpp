@@ -10,6 +10,8 @@
 #include <dlfcn.h>
 #endif
 
+#include <vector>
+
 #include <filesystem>
 
 #include "../headers/com_walker_devolay_Devolay.h"

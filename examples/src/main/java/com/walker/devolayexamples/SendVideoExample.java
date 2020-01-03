@@ -32,9 +32,9 @@ public class SendVideoExample {
         int frameCounter = 0;
         long fpsPeriod = System.currentTimeMillis();
 
-        // Run for one minute
+        // Run for ten minutes
         long startTime = System.currentTimeMillis();
-        while(System.currentTimeMillis() - startTime < 1000 * 60) {
+        while(System.currentTimeMillis() - startTime < 1000 * 60 * 10) {
 
             //Fill in the buffer for one frame.
             fillFrame(width, height, frameCounter, data);

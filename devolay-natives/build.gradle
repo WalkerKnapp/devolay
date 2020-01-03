@@ -71,20 +71,5 @@ components.main.binaries.whenElementFinalized { binary ->
         }
         
         add(binary.includePathConfiguration.name, files(ndiIncludePath));
-
-        // All of the needed boost libraries
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/dll/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/config/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/predef/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/core/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/type_traits/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/throw_exception/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/assert/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/static_assert/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/winapi/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/move/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/smart_ptr/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/mpl/include"))
-        add(binary.includePathConfiguration.name, files(projectDir.getAbsolutePath() + "/lib/preprocessor/include"))
     }
 }

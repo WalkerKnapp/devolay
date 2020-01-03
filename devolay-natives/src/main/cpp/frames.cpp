@@ -351,6 +351,10 @@ void Java_com_walker_devolay_DevolayVideoFrame_setData(JNIEnv *env, jclass jClaz
 
 jobject Java_com_walker_devolay_DevolayVideoFrame_getData(JNIEnv *env, jclass jClazz, jlong pFrame) {
     auto *frame = reinterpret_cast<NDIlib_video_frame_v2_t *>(pFrame);
-    // TODO: Resolve this sizing issue. If the no samples, no channels are increased, will read unknown memory. Maybe force deallocate data on changing one of those?
-    return env->NewDirectByteBuffer(frame->p_data, frame->line_stride_in_bytes * frame->yres);
+    if(frame->p_data) {
+        // TODO: Resolve this sizing issue. If the no samples, no channels are increased, will read unknown memory. Maybe force deallocate data on changing one of those?
+        return env->NewDirectByteBuffer(frame->p_data, frame->line_stride_in_bytes * frame->yres);
+    } else {
+        return nullptr;
+    }
 }

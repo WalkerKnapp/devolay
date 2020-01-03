@@ -1,5 +1,7 @@
 #include "devolay.h"
 
+#include <cstdio>
+
 #include "com_walker_devolay_DevolayReceiver.h"
 
 jlong Java_com_walker_devolay_DevolayReceiver_receiveCreate
@@ -7,7 +9,9 @@ jlong Java_com_walker_devolay_DevolayReceiver_receiveCreate
 
     auto *recv_create = new NDIlib_recv_create_v3_t();
 
-    recv_create->source_to_connect_to = *(reinterpret_cast<NDIlib_source_t *>(pSource));
+    if(pSource != 0) {
+        recv_create->source_to_connect_to = *(reinterpret_cast<NDIlib_source_t *>(pSource));
+    }
     recv_create->color_format = static_cast<NDIlib_recv_color_format_e>(jColorFormat);
     recv_create->bandwidth = static_cast<NDIlib_recv_bandwidth_e>(jReceiveBandwidth);
     recv_create->allow_video_fields = jAllowVideoFields;

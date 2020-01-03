@@ -19,6 +19,8 @@ library {
             compileTask.compilerArgs.add("-std=c++17")
             compileTask.compilerArgs.add("-lstdc++fs")
 
+            compileTask.compilerArgs.add("-static")
+
             linkExecutable.linkerArgs.add("-lstdc++fs")
         }
     }

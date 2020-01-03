@@ -4,8 +4,6 @@
 #include "../headers/com_walker_devolay_DevolaySender.h"
 
 jlong Java_com_walker_devolay_DevolaySender_sendCreate(JNIEnv *env, jclass jClazz, jstring jNdiName, jstring jGroups, jboolean jClockVideo, jboolean jClockAudio) {
-    printf("sendCreate\n");
-
     auto *NDI_send_create_desc = new NDIlib_send_create_t();
 
     auto *isCopy = new jboolean();

@@ -37,17 +37,18 @@ jint Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz)
 
     for(const std::string& possiblePath : locations) {
         fs::path possibleLibPath(possiblePath);
-        //possibleLibPath += "/";
+        possibleLibPath += "/";
         possibleLibPath += NDILIB_LIBRARY_NAME;
 
-        printf("Testing for NDI at %s\n", possibleLibPath.c_str());
+        //printf("Testing for NDI at %s\n", possibleLibPath.string().c_str());
 
         if(fs::exists(possibleLibPath) && fs::is_regular_file(possibleLibPath)) {
-            printf("Found NDI library at '%s'\n", possibleLibPath.c_str());
+            //printf("Found NDI library at '%s'\n", possibleLibPath.c_str());
 
             // Load NDI library
 #ifdef _WIN32
-            HMODULE hNDILib = LoadLibraryA(possibleLibPath.c_str());
+            LPCSTR libNameC = possibleLibPath.string().c_str();
+            HMODULE hNDILib = LoadLibraryA(libNameC);
 
             if(hNDILib) {
                 const NDIlib_v3* (*NDIlib_v3_load)(void) = NULL;

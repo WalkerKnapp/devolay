@@ -38,7 +38,12 @@ task executeRecordingExample(type:JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-task monitorExample(type:JavaExec) {
+task executeMonitorExample(type:JavaExec) {
     main = "com.walker.devolayexamples.MonitorExample"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task executeFrameSyncExample(type:JavaExec) {
+    main = "com.walker.devolayexamples.FrameSyncExample"
     classpath = sourceSets.main.runtimeClasspath
 }

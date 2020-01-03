@@ -22,7 +22,7 @@ public enum DevolayFrameFourCCType {
     // starts at image_ptr + yres*stride. The alpha channel stride is stride/2.
     UYVA('U', 'Y', 'V', 'A');
 
-    int id;
+    public int id;
 
     DevolayFrameFourCCType(char c1, char c2, char c3, char c4) {
         id = (c1 & 0xFF) | ((c2 & 0xFF) << 8) | ((c3 & 0xFF) << 16) | ((c4 & 0xFF) << 24);
@@ -48,7 +48,7 @@ public enum DevolayFrameFourCCType {
         } else if (id == UYVA.id) {
             return UYVA;
         } else {
-            throw new IllegalArgumentException("Unknown FFCC id: " + id);
+            return null;
         }
     }
 }

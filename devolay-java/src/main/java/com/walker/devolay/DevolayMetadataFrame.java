@@ -21,9 +21,7 @@ public class DevolayMetadataFrame implements AutoCloseable {
     }
 
     public void setData(String data) {
-        if(allocatedBufferSource.get() != null) {
-            allocatedBufferSource.getAndSet(null).freeMetadata(this);
-        }
+        freeBuffer();
         setData(structPointer, data);
     }
 
@@ -47,9 +45,7 @@ public class DevolayMetadataFrame implements AutoCloseable {
 
     @Override
     public void close() {
-        if(allocatedBufferSource.get() != null) {
-            allocatedBufferSource.getAndSet(null).freeMetadata(this);
-        }
+        freeBuffer();
         // TODO: Auto-clean resources.
         destroyMetadataFrame(structPointer);
     }

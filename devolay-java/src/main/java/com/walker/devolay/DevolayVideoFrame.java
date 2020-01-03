@@ -89,9 +89,7 @@ public class DevolayVideoFrame implements AutoCloseable {
     }
 
     public void setData(ByteBuffer buffer) {
-        if(allocatedBufferSource.get() != null) {
-            allocatedBufferSource.getAndSet(null).freeVideo(this);
-        }
+        freeBuffer();
         setData(structPointer, buffer);
     }
     public ByteBuffer getData() {

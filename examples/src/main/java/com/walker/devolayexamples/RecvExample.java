@@ -32,6 +32,7 @@ public class RecvExample {
         long startTime = System.currentTimeMillis();
         while(System.currentTimeMillis() - startTime < 1000 * 60) {
             // Capture with a timeout of 5000 milliseconds
+            // This method now explicitly clears data from videoFrame, audioFrame, and metadataFrame that was previously allocated
             switch (receiver.receiveCapture(videoFrame, audioFrame, metadataFrame, 5000)) {
                 case NONE:
                     System.out.println("No data received.");
@@ -39,19 +40,12 @@ public class RecvExample {
                 case VIDEO:
                     System.out.println("Video data received (" + videoFrame.getXResolution() + "x" + videoFrame.getYResolution() + ", " +
                             videoFrame.getFrameRateN() + "/" + videoFrame.getFrameRateD() + ").");
-
-                    videoFrame.close();
-                    videoFrame = new DevolayVideoFrame();
                     break;
                 case AUDIO:
                     System.out.println("Audio data received (" + audioFrame.getSamples() + ", " + audioFrame.getChannelStride() + ").");
-                    audioFrame.close();
-                    audioFrame = new DevolayAudioFrame();
                     break;
                 case METADATA:
                     System.out.println("Metadata received (" + metadataFrame.getData() + ").");
-                    metadataFrame.close();
-                    metadataFrame = new DevolayMetadataFrame();
                     break;
             }
 

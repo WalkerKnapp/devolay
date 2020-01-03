@@ -73,6 +73,13 @@ public class DevolayReceiver implements AutoCloseable {
         this(source, ColorFormat.UYVY_BGRA, RECEIVE_BANDWIDTH_HIGHEST, true, null);
     }
 
+    public DevolayReceiver(ColorFormat colorFormat, int receiveBandwidth, boolean allowVideoFields, String name) {
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
+
+        this.ndilibRecievePointer = receiveCreate(0L, colorFormat.id, receiveBandwidth, allowVideoFields, name);
+    }
+
     public DevolayReceiver() {
         // TODO: Implement this forced reference more effectively
         Devolay.loadLibraries();
@@ -98,7 +105,9 @@ public class DevolayReceiver implements AutoCloseable {
      * This will return DevolayFrameType#NONE if no data is received in the timeout span.
      * This will return DevolayFrameType#ERROR if the connection is lost.
      *
-     * Frames that are filled with data MUST be later manually cleared, with calling #close or with a try-with-resources
+     * Frames that are filled with data MUST be later manually cleared, with calling #freeBuffer, #close, or with a try-with-resources
+     *
+     * This method will free any previously allocated data from all frames, even if data is not written to a given frame.
      *
      * @param videoFrame A video frame to put data into. Any existing data will be replaced. If null, video will not be captured.
      * @param audioFrame A audio frame to put data into. Any existing data will be replaced. If null, audio will not be captured.
@@ -108,6 +117,16 @@ public class DevolayReceiver implements AutoCloseable {
      * @return The frame type that was captured, DevolayFrameType#NONE, or DevolayFrameType#ERROR
      */
     public DevolayFrameType receiveCapture(DevolayVideoFrame videoFrame, DevolayAudioFrame audioFrame, DevolayMetadataFrame metadataFrame, int timeout) {
+        if(videoFrame != null) {
+            videoFrame.freeBuffer();
+        }
+        if(audioFrame != null) {
+            audioFrame.freeBuffer();
+        }
+        if(metadataFrame != null) {
+            metadataFrame.freeBuffer();
+        }
+
         int type = receiveCaptureV2(ndilibRecievePointer,
                 videoFrame == null ? 0L : videoFrame.structPointer,
                 audioFrame == null ? 0L : audioFrame.structPointer,
@@ -117,19 +136,10 @@ public class DevolayReceiver implements AutoCloseable {
         DevolayFrameType frameType = DevolayFrameType.valueOf(type);
 
         if(frameType == DevolayFrameType.VIDEO && videoFrame != null) {
-            if(videoFrame.allocatedBufferSource.get() != null) {
-                videoFrame.allocatedBufferSource.get().freeVideo(videoFrame);
-            }
             videoFrame.allocatedBufferSource.set(this);
         } else if (frameType == DevolayFrameType.AUDIO && audioFrame != null) {
-            if(audioFrame.allocatedBufferSource.get() != null) {
-                audioFrame.allocatedBufferSource.get().freeAudio(audioFrame);
-            }
             audioFrame.allocatedBufferSource.set(this);
         } else if (frameType == DevolayFrameType.METADATA && metadataFrame != null) {
-            if(metadataFrame.allocatedBufferSource.get() != null) {
-                metadataFrame.allocatedBufferSource.get().freeMetadata(metadataFrame);
-            }
             metadataFrame.allocatedBufferSource.set(this);
         }
 

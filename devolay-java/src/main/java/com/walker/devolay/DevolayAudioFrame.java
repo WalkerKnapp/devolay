@@ -75,9 +75,7 @@ public class DevolayAudioFrame implements AutoCloseable {
      * @param data A planar ByteBuffer of floating point samples. MUST be a direct ByteBuffer.
      */
     public void setData(ByteBuffer data) {
-        if(allocatedBufferSource.get() != null) {
-            allocatedBufferSource.getAndSet(null).freeAudio(this);
-        }
+        freeBuffer();
         setData(structPointer, data);
     }
     public ByteBuffer getData() {

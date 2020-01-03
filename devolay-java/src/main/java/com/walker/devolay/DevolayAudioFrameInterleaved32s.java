@@ -4,12 +4,14 @@ import java.nio.ByteBuffer;
 
 public class DevolayAudioFrameInterleaved32s implements AutoCloseable {
 
+    static {
+        // TODO: Implement this forced reference more effectively
+        Devolay.loadLibraries();
+    }
+
     final long structPointer;
 
     public DevolayAudioFrameInterleaved32s() {
-        // TODO: Implement this forced reference more effectively
-        Devolay.loadLibraries();
-
         this.structPointer = createNewAudioFrameInterleaved32sDefaultSettings();
     }
 

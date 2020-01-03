@@ -5,15 +5,17 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DevolayAudioFrame implements AutoCloseable {
 
-    final long structPointer;
-
-    // set when a buffer is allocated by a receiver that later needs to be freed w/ that receiver.
-    AtomicReference<DevolayReceiver> allocatedBufferSource = new AtomicReference<>();
-
-    public DevolayAudioFrame() {
+    static {
         // TODO: Implement this forced reference more effectively
         Devolay.loadLibraries();
+    }
 
+    final long structPointer;
+
+    // set when a buffer is allocated by a source that later needs to be freed w/ that source.
+    AtomicReference<DevolayFrameCleaner> allocatedBufferSource = new AtomicReference<>();
+
+    public DevolayAudioFrame() {
         this.structPointer = createNewAudioFrameDefaultSettings();
     }
 

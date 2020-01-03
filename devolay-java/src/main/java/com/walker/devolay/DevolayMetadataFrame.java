@@ -7,7 +7,7 @@ public class DevolayMetadataFrame implements AutoCloseable {
     final long structPointer;
 
     // set when a buffer is allocated by a receiver that later needs to be freed w/ that receiver.
-    AtomicReference<DevolayReceiver> allocatedBufferSource = new AtomicReference<>();
+    AtomicReference<DevolayFrameCleaner> allocatedBufferSource = new AtomicReference<>();
 
     public DevolayMetadataFrame() {
         // TODO: Implement this forced reference more effectively

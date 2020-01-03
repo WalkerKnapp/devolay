@@ -1,6 +1,6 @@
 package com.walker.devolay;
 
-public class DevolayReceiver implements AutoCloseable {
+public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseable {
     // Receive only metadata
     public static final int RECEIVE_BANDWIDTH_METADATA_ONLY = -10;
     // Receive only audio and metadata
@@ -60,7 +60,7 @@ public class DevolayReceiver implements AutoCloseable {
     /**
      * Holds the reference to the NDIlib_send_instance_t object
      */
-    private final long ndilibRecievePointer;
+    final long ndilibRecievePointer;
 
     public DevolayReceiver(DevolaySource source, ColorFormat colorFormat, int receiveBandwidth, boolean allowVideoFields, String name) {
         // TODO: Implement this forced reference more effectively
@@ -215,15 +215,18 @@ public class DevolayReceiver implements AutoCloseable {
         receiveDestroy(ndilibRecievePointer);
     }
 
+    @Override
     void freeVideo(DevolayVideoFrame frame) {
         freeVideoV2(ndilibRecievePointer, frame.structPointer);
     }
 
+    @Override
     void freeAudio(DevolayAudioFrame frame) {
         freeAudioV2(ndilibRecievePointer, frame.structPointer);
     }
 
-    void freeMetadata(DevolayMetadataFrame frame) {
+    @Override
+    public void freeMetadata(DevolayMetadataFrame frame) {
         freeMetadata(ndilibRecievePointer, frame.structPointer);
     }
 

@@ -1,117 +1,75 @@
 package com.walker.devolay;
 
-import java.nio.ByteBuffer;
-
 public class DevolayUtilities {
+
     /**
-     * Reads interleaved floating-point audio data from interleavedData, and writes sequential planes to the planarData buffer.
+     * Convert from the standard planar floating-point audio to interleaved 16s audio.
      *
-     * interleavedData is formatted with one sample for each channel in sequence, as in (for 4 frames, 2 channels):
-     * aa bb aa bb aa bb aa bb
-     *
-     * planarData is formatted with sequential planes for each channel, as in (for 4 frames, 2 channels):
-     * aa aa aa aa bb bb bb bb
-     *
-     * @param interleavedData A ByteBuffer of interleaved floating-point samples to convert.
-     * @param planarData A ByteBuffer to write planar floating-point samples to.
-     * @param frames The total number of frames of audio
-     * @param channels The number of channels/planes of data in the audio.
+     * @param srcFrame The frame to take input floating-point data from
+     * @param targetFrame The frame to write output interleaved data to.
      */
-    public static void interleavedFloatToPlanarFloat(ByteBuffer interleavedData, ByteBuffer planarData, int frames, int channels) {
-        // No conversion is needed when there is one channel.
-        if (channels == 1) {
-            planarData.put(interleavedData);
-            return;
-        }
-
-        // Set the initial offsets of each plane
-        int[] planePos = new int[channels];
-        // Skip the first plane, as it will always be at position 0
-        for(int i = 1; i < channels; i++) {
-            planePos[i] = i * frames * Float.BYTES;
-        }
-
-        // Copy all frames
-        for (int f = 0; f < frames; f++) {
-            for(int i = 0; i < channels; i++) {
-                planarData.putFloat(planePos[i], interleavedData.getFloat());
-                planePos[i] += Float.BYTES;
-            }
-        }
+    public static void planarFloatToInterleaved16s(DevolayAudioFrame srcFrame, DevolayAudioFrameInterleaved16s targetFrame) {
+        convertToInterleaved16s(srcFrame.structPointer, targetFrame.structPointer);
     }
 
     /**
-     * Reads interleaved floating-point audio data from interleavedData, and writes sequential planes to the planarData buffer.
+     * Convert from interleaved 16s audio to the standard floating-point audio.
      *
-     * interleavedData is formatted with one sample for each channel in sequence, as in (for 4 frames, 2 channels):
-     * aa bb aa bb aa bb aa bb
-     *
-     * planarData is formatted with sequential planes for each channel, as in (for 4 frames, 2 channels):
-     * aa aa aa aa bb bb bb bb
-     *
-     * Infers the frame count from the size of interleavedData
-     *
-     * @param interleavedData A ByteBuffer of interleaved floating-point samples to convert.
-     * @param planarData A ByteBuffer to write planar floating-point samples to.
-     * @param channels The number of channels/planes of data in the audio.
+     * @param srcFrame The frame to take interleaved data from.
+     * @param targetFrame The frame to write output floating-point data to.
      */
-    public static void interleavedFloatToPlanarFloat(ByteBuffer interleavedData, ByteBuffer planarData, int channels) {
-        interleavedFloatToPlanarFloat(interleavedData, planarData, interleavedData.remaining() / (channels * Float.BYTES), channels);
+    public static void interleaved16sToPlanarFloat(DevolayAudioFrameInterleaved16s srcFrame, DevolayAudioFrame targetFrame) {
+        targetFrame.freeBuffer();
+        convertFromInterleaved16s(srcFrame.structPointer, targetFrame.structPointer);
     }
 
     /**
-     * Reads planar floating-point audio data from planarData, and writes interleaved samples to the interleavedData buffer.
+     * Convert from the standard planar floating-point audio to interleaved 32s audio.
      *
-     * planarData is formatted with sequential planes for each channel, as in (for 4 frames, 2 channels):
-     * aa aa aa aa bb bb bb bb
-     *
-     * interleavedData is formatted with one sample for each channel in sequence, as in (for 4 frames, 2 channels):
-     * aa bb aa bb aa bb aa bb
-     *
-     * @param planarData A ByteBuffer to of planes of floating-point samples to convert.
-     * @param interleavedData A ByteBuffer to write interleaved floating-point samples to.
-     * @param frames The total number of frames of audio
-     * @param channels The number of channels/planes of data in the audio.
+     * @param srcFrame The frame to take input floating-point data from.
+     * @param targetFrame The frame to write output interleaved data to.
      */
-    public static void planarFloatToInterleavedFloat(ByteBuffer planarData, ByteBuffer interleavedData, int frames, int channels) {
-        // No conversion is needed when there is one channel
-        if (channels == 1) {
-            interleavedData.put(planarData);
-            return;
-        }
-
-        // Compute the offset each plane should be in the input data
-        int[] planePos = new int[channels];
-        // Skip the first plane, as it will always be at position 0
-        for(int i = 1; i < channels; i++) {
-            planePos[i] = i * frames * Float.BYTES;
-        }
-
-        // Copy all frames
-        for (int f = 0; f < frames; f++) {
-            for(int i = 0; i < channels; i++) {
-                interleavedData.putFloat(planarData.getFloat(planePos[f]));
-                planePos[f] += Float.BYTES;
-            }
-        }
+    public static void planarFloatToInterleaved32s(DevolayAudioFrame srcFrame, DevolayAudioFrameInterleaved32s targetFrame) {
+        convertToInterleaved32s(srcFrame.structPointer, targetFrame.structPointer);
     }
 
     /**
-     * Reads planar floating-point audio data from planarData, and writes interleaved samples to the interleavedData buffer.
+     * Convert from interleaved 32s audio data to the standard planar floating-point audio.
      *
-     * planarData is formatted with sequential planes for each channel, as in (for 4 frames, 2 channels):
-     * aa aa aa aa bb bb bb bb
-     *
-     * interleavedData is formatted with one sample for each channel in sequence, as in (for 4 frames, 2 channels):
-     * aa bb aa bb aa bb aa bb
-     *
-     * Infers the frame count from the size of planarData
-     *
-     * @param planarData A ByteBuffer to of planes of floating-point samples to convert.
-     * @param interleavedData A ByteBuffer to write interleaved floating-point samples to.
-     * @param channels The number of channels/planes of data in the audio.
+     * @param srcFrame The frame to take input interleaved data from.
+     * @param targetFrame The frame to write output floating-point data to.
      */
-    public static void planarFloatToInterleavedFloat(ByteBuffer planarData, ByteBuffer interleavedData, int channels) {
-        planarFloatToInterleavedFloat(planarData, interleavedData, planarData.remaining() / (channels * Float.BYTES), channels);
+    public static void interleaved32sToPlanarFloat(DevolayAudioFrameInterleaved32s srcFrame, DevolayAudioFrame targetFrame) {
+        targetFrame.freeBuffer();
+        convertFromInterleaved32s(srcFrame.structPointer, targetFrame.structPointer);
     }
+
+    /**
+     * Convert from the standard floating-point audio data to interleaved floating-point audio data.
+     *
+     * @param srcFrame The frame to take input floating-point data from.
+     * @param targetFrame The frame to write output interleaved floating-point data to.
+     */
+    public static void planarFloatToInterleavedFloat(DevolayAudioFrame srcFrame, DevolayAudioFrameInterleaved32f targetFrame) {
+        convertToInterleaved32f(srcFrame.structPointer, targetFrame.structPointer);
+    }
+
+    /**
+     * Convert from interleaved floating-point audio data to the standard floating-point audio data.
+     *
+     * @param srcFrame The frame to take input interleaved floating-point data from.
+     * @param targetFrame The frame to write output floating-point data to.
+     */
+    public static void interleavedFloatToPlanarFloat(DevolayAudioFrameInterleaved32f srcFrame, DevolayAudioFrame targetFrame) {
+        targetFrame.freeBuffer();
+        convertFromInterleaved32f(srcFrame.structPointer, targetFrame.structPointer);
+    }
+
+    // Native methods
+    private static native void convertToInterleaved16s(long pSrcFrame, long pDstFrame);
+    private static native void convertFromInterleaved16s(long pSrcFrame, long pDstFrame);
+    private static native void convertToInterleaved32s(long pSrcFrame, long pDstFrame);
+    private static native void convertFromInterleaved32s(long pSrcFrame, long pDstFrame);
+    private static native void convertToInterleaved32f(long pSrcFrame, long pDstFrame);
+    private static native void convertFromInterleaved32f(long pSrcFrame, long pDstFrame);
 }

@@ -5,6 +5,7 @@
 #include "../headers/com_walker_devolay_DevolayAudioFrame.h"
 #include "../headers/com_walker_devolay_DevolayAudioFrameInterleaved16s.h"
 #include "../headers/com_walker_devolay_DevolayAudioFrameInterleaved32s.h"
+#include "../headers/com_walker_devolay_DevolayAudioFrameInterleaved32f.h"
 #include "../headers/com_walker_devolay_DevolayMetadataFrame.h"
 #include "../headers/com_walker_devolay_DevolayVideoFrame.h"
 
@@ -218,6 +219,59 @@ jobject Java_com_walker_devolay_DevolayAudioFrameInterleaved32s_getData(JNIEnv *
 
     // TODO: Resolve this sizing issue. If the no samples, no channels are increased, will read unknown memory. Maybe force deallocate data on changing one of those?
     return env->NewDirectByteBuffer(frame->p_data, frame->no_samples * frame->no_channels * sizeof(int32_t));
+}
+
+/** Audio frame 32f Interleaved **/
+jlong Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_createNewAudioFrameInterleaved32fDefaultSettings(JNIEnv *env, jclass jClazz) {
+    auto *NDI_audio_frame = new NDIlib_audio_frame_interleaved_32f_t();
+    return (jlong) NDI_audio_frame;
+}
+
+void Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_destroyAudioFrameInterleaved32f(JNIEnv *env, jclass jClazz, jlong pFrame) {
+    delete reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame);
+}
+
+void Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_setSampleRate(JNIEnv *env, jclass jClazz, jlong pFrame, jint jSampleRate) {
+    reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame)->sample_rate = jSampleRate;
+}
+
+jint Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_getSampleRate(JNIEnv *env, jclass jClazz, jlong pFrame) {
+    return reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame)->sample_rate;
+}
+
+void Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_setNoChannels(JNIEnv *env, jclass jClazz, jlong pFrame, jint jNoChannels) {
+    reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame)->no_channels = jNoChannels;
+}
+
+jint Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_getNoChannels(JNIEnv *env, jclass jClazz, jlong pFrame) {
+    return reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame)->no_channels;
+}
+
+void Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_setNoSamples(JNIEnv *env, jclass jClazz, jlong pFrame, jint jNoSamples) {
+    reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame)->no_samples = jNoSamples;
+}
+
+jint Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_getNoSamples(JNIEnv *env, jclass jClazz, jlong pFrame) {
+    return reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame)->no_samples;
+}
+
+void Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_setTimecode(JNIEnv *env, jclass jClazz, jlong pFrame, jlong jTimecode) {
+    reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame)->timecode = jTimecode;
+}
+
+jlong Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_getTimecode(JNIEnv *env, jclass jClazz, jlong pFrame) {
+    return reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame)->timecode;
+}
+
+void Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_setData(JNIEnv *env, jclass jClazz, jlong pFrame, jobject jData) {
+    reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame)->p_data = static_cast<float *>(env->GetDirectBufferAddress(jData));
+}
+
+jobject Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_getData(JNIEnv *env, jclass jClazz, jlong pFrame) {
+    auto frame = reinterpret_cast<NDIlib_audio_frame_interleaved_32f_t *>(pFrame);
+
+    // TODO: Resolve this sizing issue. If the no samples, no channels are increased, will read unknown memory. Maybe force deallocate data on changing one of those?
+    return env->NewDirectByteBuffer(frame->p_data, frame->no_samples * frame->no_channels * sizeof(float));
 }
 
 /** Metadata Frame **/

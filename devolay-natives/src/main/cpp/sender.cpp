@@ -61,6 +61,11 @@ void Java_com_walker_devolay_DevolaySender_sendAudioInterleaved32s(JNIEnv *env, 
                                                              reinterpret_cast<const NDIlib_audio_frame_interleaved_32s_t *>(pFrame));
 }
 
+void Java_com_walker_devolay_DevolaySender_sendAudioInterleaved32f(JNIEnv *env, jclass jClazz, jlong pSender, jlong pFrame) {
+    getNDILib()->NDIlib_util_send_send_audio_interleaved_32f(reinterpret_cast<NDIlib_send_instance_t>(pSender),
+                                                             reinterpret_cast<const NDIlib_audio_frame_interleaved_32f_t *>(pFrame));
+}
+
 void Java_com_walker_devolay_DevolaySender_sendMetadata(JNIEnv *env, jclass jClazz, jlong pSender, jlong pFrame) {
     getNDILib()->NDIlib_send_send_metadata(reinterpret_cast<NDIlib_send_instance_t>(pSender),
                                       reinterpret_cast<const NDIlib_metadata_frame_t *>(pFrame));

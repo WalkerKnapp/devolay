@@ -1,6 +1,7 @@
 #include "devolay.h"
 
 #include <cstdio>
+#include <string.h>
 
 #include "../headers/com_walker_devolay_DevolayAudioFrame.h"
 #include "../headers/com_walker_devolay_DevolayAudioFrameInterleaved16s.h"
@@ -276,29 +277,45 @@ jobject Java_com_walker_devolay_DevolayAudioFrameInterleaved32f_getData(JNIEnv *
 
 /** Metadata Frame **/
 jlong Java_com_walker_devolay_DevolayMetadataFrame_createNewMetadataFrameDefaultSettings(JNIEnv *env, jclass jClazz) {
-    return 0;
+    auto *NDI_metadata_frame = new NDIlib_metadata_frame_t();
+    return (jlong) NDI_metadata_frame;
 }
 
 void Java_com_walker_devolay_DevolayMetadataFrame_destroyMetadataFrame(JNIEnv *env, jclass jClazz, jlong pFrame) {
+    delete reinterpret_cast<NDIlib_metadata_frame_t *>(pFrame);
 }
 
 jstring Java_com_walker_devolay_DevolayMetadataFrame_getData(JNIEnv *env, jclass jClazz, jlong pFrame) {
-    return nullptr;
+    auto *NDI_metadata_frame = reinterpret_cast<NDIlib_metadata_frame_t *>(pFrame);
+    return env->NewStringUTF(NDI_metadata_frame->p_data);
 }
 
 void Java_com_walker_devolay_DevolayMetadataFrame_setData(JNIEnv *env, jclass jClazz, jlong pFrame, jstring jData) {
+    auto *isCopy = new jboolean();
+    *isCopy = JNI_FALSE;
+    const char *data = env->GetStringUTFChars(jData, isCopy);
+    delete isCopy;
+
+    char *mutable_data = new char[env->GetStringUTFLength(jData)];
+
+    strcpy_s(mutable_data, env->GetStringUTFLength(jData) * sizeof(char), data);
+
+    env->ReleaseStringUTFChars(jData, data);
+
+    reinterpret_cast<NDIlib_metadata_frame_t *>(pFrame)->p_data = mutable_data;
 }
 
 jlong Java_com_walker_devolay_DevolayMetadataFrame_getTimecode(JNIEnv *env, jclass jClazz, jlong pFrame) {
-    return 0;
+    return reinterpret_cast<NDIlib_metadata_frame_t *>(pFrame)->timecode;
 }
 
 void Java_com_walker_devolay_DevolayMetadataFrame_setTimecode(JNIEnv *env, jclass jClazz, jlong pFrame, jlong jTimecode) {
+    reinterpret_cast<NDIlib_metadata_frame_t *>(pFrame)->timecode = jTimecode;
 }
 
 /** Video Frame **/
 jlong Java_com_walker_devolay_DevolayVideoFrame_createNewVideoFrameDefaultSettings(JNIEnv *env, jclass jClazz) {
-    NDIlib_video_frame_v2_t *NDI_video_frame = new NDIlib_video_frame_v2_t();
+    auto *NDI_video_frame = new NDIlib_video_frame_v2_t();
     return (jlong) NDI_video_frame;
 }
 

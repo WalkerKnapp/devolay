@@ -4,7 +4,8 @@ Java bindings for the Newtek NDI(tm) SDK. For more information about NDI(tm), se
 http://NDI.NewTek.com/
 
 ## Download / Installation
-Currently, Devolay is only actively tested on Windows, but as of v1.1.1, builds now are bundled with binaries for Windows, MacOS, and Linux. If you have any issues with these, [open an issue](https://github.com/WalkerKnapp/devolay/issues) so they can be resolved in the next version.
+Currently, Devolay is only actively tested on Windows, but bintray builds include Windows, Linux, and MacOS builds.
+If you have any issues unique to the Linux or MacOS builds, please [open an issue](https://github.com/WalkerKnapp/devolay/issues) so they can be resolved in the next version.
 
 ### Gradle
 ```groovy
@@ -15,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.walker:devolay:1.1.1'
+    implementation 'com.walker:devolay:1.2.0'
 }
 ```
 
@@ -38,7 +39,7 @@ In pom.xml:
 <dependency>
   <groupId>com.walker</groupId>
   <artifactId>devolay</artifactId>
-  <version>1.1.1</version>
+  <version>1.2.0</version>
   <type>pom</type>
 </dependency>
 ```

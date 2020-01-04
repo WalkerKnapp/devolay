@@ -1,6 +1,6 @@
 #include "devolay.h"
 
-#include "com_walker_devolay_DevolayFramesync.h"
+#include "com_walker_devolay_DevolayFrameSync.h"
 
 jlong Java_com_walker_devolay_DevolayFrameSync_framesyncCreate(JNIEnv *env, jclass jClazz, jlong pReceiver) {
     return (jlong) getNDILib()->NDIlib_framesync_create(reinterpret_cast<NDIlib_recv_instance_t *>(pReceiver));

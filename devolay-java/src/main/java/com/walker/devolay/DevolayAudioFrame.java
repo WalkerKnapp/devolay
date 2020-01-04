@@ -3,6 +3,9 @@ package com.walker.devolay;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * An audio frame that stores floating-point planar samples
+ */
 public class DevolayAudioFrame implements AutoCloseable {
 
     static {

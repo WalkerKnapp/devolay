@@ -57,6 +57,10 @@ public class DevolaySender implements AutoCloseable {
         sendAudioInterleaved32s(ndilibSendInstancePointer, frame.structPointer);
     }
 
+    public void sendAudioFrameInterleaved32f(DevolayAudioFrameInterleaved32f frame) {
+        sendAudioInterleaved32f(ndilibSendInstancePointer, frame.structPointer);
+    }
+
     public void sendMetadataFrame(DevolayMetadataFrame frame) {
         sendMetadata(ndilibSendInstancePointer, frame.structPointer);
     }
@@ -114,6 +118,7 @@ public class DevolaySender implements AutoCloseable {
     private static native void sendAudioV2(long sendInstance, long audioFrameInstance);
     private static native void sendAudioInterleaved16s(long sendInstance, long audioFrameInstance);
     private static native void sendAudioInterleaved32s(long sendInstance, long audioFrameInstance);
+    private static native void sendAudioInterleaved32f(long sendInstance, long audioFrameInstance);
 
     private static native void sendMetadata(long sendInstance, long metadataFrameInstance);
 

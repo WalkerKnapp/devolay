@@ -2,6 +2,9 @@ package com.walker.devolay;
 
 import java.nio.ByteBuffer;
 
+/**
+ * An audio frame that stores 32-bit interleaved samples
+ */
 public class DevolayAudioFrameInterleaved32s implements AutoCloseable {
 
     static {

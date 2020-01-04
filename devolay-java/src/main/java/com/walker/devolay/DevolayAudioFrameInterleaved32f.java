@@ -3,9 +3,9 @@ package com.walker.devolay;
 import java.nio.ByteBuffer;
 
 /**
- * An audio frame that stores 16 bit interleaved samples
+ * An audio frame that stores floating-point interleaved samples
  */
-public class DevolayAudioFrameInterleaved16s implements AutoCloseable {
+public class DevolayAudioFrameInterleaved32f implements AutoCloseable {
 
     static {
         // TODO: Implement this forced reference more effectively
@@ -14,8 +14,8 @@ public class DevolayAudioFrameInterleaved16s implements AutoCloseable {
 
     final long structPointer;
 
-    public DevolayAudioFrameInterleaved16s() {
-        this.structPointer = createNewAudioFrameInterleaved16sDefaultSettings();
+    public DevolayAudioFrameInterleaved32f() {
+        this.structPointer = createNewAudioFrameInterleaved32fDefaultSettings();
     }
 
     public void setSampleRate(int sampleRate) {
@@ -46,13 +46,6 @@ public class DevolayAudioFrameInterleaved16s implements AutoCloseable {
         return getTimecode(structPointer);
     }
 
-    public void setReferenceLevel(int referenceLevel) {
-        setReferenceLevel(structPointer, referenceLevel);
-    }
-    public long getReferenceLevel() {
-        return getReferenceLevel(structPointer);
-    }
-
     public void setData(ByteBuffer data) {
         setData(structPointer, data);
     }
@@ -63,13 +56,13 @@ public class DevolayAudioFrameInterleaved16s implements AutoCloseable {
     @Override
     public void close() {
         // TODO: Auto-clean resources.
-        destroyAudioFrameInterleaved16s(structPointer);
+        destroyAudioFrameInterleaved32f(structPointer);
     }
 
     // Native Methods
 
-    private static native long createNewAudioFrameInterleaved16sDefaultSettings();
-    private static native void destroyAudioFrameInterleaved16s(long structPointer);
+    private static native long createNewAudioFrameInterleaved32fDefaultSettings();
+    private static native void destroyAudioFrameInterleaved32f(long structPointer);
 
     private static native void setSampleRate(long structPointer, int sampleRate);
     private static native int getSampleRate(long structPointer);
@@ -79,8 +72,6 @@ public class DevolayAudioFrameInterleaved16s implements AutoCloseable {
     private static native int getNoSamples(long structPointer);
     private static native void setTimecode(long structPointer, long timecode);
     private static native long getTimecode(long structPointer);
-    private static native void setReferenceLevel(long structPointer, int referenceLevel);
-    private static native int getReferenceLevel(long structPointer);
     private static native void setData(long structPointer, ByteBuffer data);
     private static native ByteBuffer getData(long structPointer);
 }

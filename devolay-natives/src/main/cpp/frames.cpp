@@ -298,7 +298,7 @@ void Java_com_walker_devolay_DevolayMetadataFrame_setData(JNIEnv *env, jclass jC
 
     char *mutable_data = new char[env->GetStringUTFLength(jData)];
 
-    strcpy_s(mutable_data, env->GetStringUTFLength(jData) * sizeof(char), data);
+    strcpy(mutable_data, data);
 
     env->ReleaseStringUTFChars(jData, data);
 

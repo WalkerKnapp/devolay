@@ -48,6 +48,9 @@ jint Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz)
     locations.emplace_back("/usr/lib");
     locations.emplace_back("/usr/local/lib");
 #endif
+#if defined(__APPLE__)
+    locations.emplace_back("/Library/NDI SDK for Apple/lib/x64");
+#endif
 
     for(const std::string& possiblePath : locations) {
         fs::path possibleLibPath(possiblePath);

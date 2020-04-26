@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -9,8 +10,6 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 #endif
-
-#include <vector>
 
 #if defined(__cpp_lib_filesystem)
     #define INCLUDE_STD_FILESYSTEM_EXPERIMENTAL 0

@@ -1,7 +1,7 @@
 #ifndef DEVOLAY_DEVOLAY_H
 #define DEVOLAY_DEVOLAY_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <cstddef>
 
 #include <Processing.NDI.Lib.h>

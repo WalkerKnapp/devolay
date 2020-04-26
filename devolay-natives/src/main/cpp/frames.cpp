@@ -1,7 +1,6 @@
 #include "devolay.h"
 
-#include <cstdio>
-#include <string.h>
+#include <cstring>
 
 #include "../headers/com_walker_devolay_DevolayAudioFrame.h"
 #include "../headers/com_walker_devolay_DevolayAudioFrameInterleaved16s.h"

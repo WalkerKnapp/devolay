@@ -19,7 +19,7 @@ jlong Java_com_walker_devolay_DevolayFinder_findCreate(JNIEnv *env, jclass jClaz
     }
     delete isCopy;
 
-    auto ret = getNDILib()->NDIlib_find_create_v2(NDI_find_create);
+    auto ret = getNDILib()->find_create_v2(NDI_find_create);
     delete NDI_find_create;
     return (jlong) ret;
 }
@@ -27,13 +27,13 @@ jlong Java_com_walker_devolay_DevolayFinder_findCreate(JNIEnv *env, jclass jClaz
 jlong Java_com_walker_devolay_DevolayFinder_findCreateDefaultSettings(JNIEnv *env, jclass jClazz) {
     auto *NDI_find_create = new NDIlib_find_create_t();
 
-    auto *ret = getNDILib()->NDIlib_find_create_v2(NDI_find_create);
+    auto *ret = getNDILib()->find_create_v2(NDI_find_create);
     delete NDI_find_create;
     return (jlong) ret;
 }
 
 void Java_com_walker_devolay_DevolayFinder_findDestroy(JNIEnv *env, jclass jClazz, jlong pFind) {
-    getNDILib()->NDIlib_find_destroy(reinterpret_cast<NDIlib_find_instance_t>(pFind));
+    getNDILib()->find_destroy(reinterpret_cast<NDIlib_find_instance_t>(pFind));
 }
 
 jlongArray Java_com_walker_devolay_DevolayFinder_findGetCurrentSources(JNIEnv *env, jclass jClazz, jlong pFind) {
@@ -50,5 +50,5 @@ jlongArray Java_com_walker_devolay_DevolayFinder_findGetCurrentSources(JNIEnv *e
 }
 
 jboolean Java_com_walker_devolay_DevolayFinder_findWaitForSources(JNIEnv *env, jclass jClazz, jlong pFind, jint jTimeout) {
-    return getNDILib()->NDIlib_find_wait_for_sources(reinterpret_cast<NDIlib_find_instance_t>(pFind), jTimeout);
+    return getNDILib()->find_wait_for_sources(reinterpret_cast<NDIlib_find_instance_t>(pFind), jTimeout);
 }

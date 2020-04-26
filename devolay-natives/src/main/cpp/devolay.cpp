@@ -112,3 +112,11 @@ jint Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz)
 
     return -1;
 }
+
+jstring Java_com_walker_devolay_Devolay_nGetVersion(JNIEnv *env, jclass jClazz) {
+    return env->NewStringUTF(getNDILib()->version());
+}
+
+jboolean Java_com_walker_devolay_Devolay_nIsSupportedCpu(JNIEnv *env, jclass jClazz) {
+    return getNDILib()->is_supported_CPU();
+}

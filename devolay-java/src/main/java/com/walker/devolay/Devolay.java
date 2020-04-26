@@ -60,5 +60,27 @@ public class Devolay {
         }
     }
 
+    /**
+     * Returns the current version of the underlying NDI(tm) library runtime.
+     *
+     * @return A string containing the version of the NDI(tm) runtimes.
+     */
+    public static String getNDIVersion() {
+        return nGetVersion();
+    }
+
+    /**
+     * Returns whether the current CPU in the system is capable of running NDI(tm), and by extension, Devolay.
+     *
+     * @return true if the system's CPU is capable of running NDI(tm), false if it is not capable.
+     */
+    public static boolean isSupportedCpu() {
+        return nIsSupportedCpu();
+    }
+
+    // Native Methods
+
     private static native int nLoadLibraries();
+    private static native String nGetVersion();
+    private static native boolean nIsSupportedCpu();
 }

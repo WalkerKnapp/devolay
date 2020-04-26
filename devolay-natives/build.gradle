@@ -1,4 +1,5 @@
 import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.os.OperatingSystem
 
 import java.nio.file.Files
 
@@ -44,12 +45,21 @@ components.main.binaries.whenElementFinalized { binary ->
         }
         
         System.out.println("Linking/Including NDI(tm) SDK Path")
+        def ndiSdkDirOptions = []
         
-        if(System.getenv("NDI_SDK_DIR") == null) {
+        if(System.getenv("NDI_SDK_DIR") != null) {
+            ndiSdkDirOptions.add(file(System.getenv("NDI_SDK_DIR")).toPath())
+        }
+
+        if(OperatingSystem.current().isMacOsX() && file("/Library/NDI SDK for Apple").exists()) {
+            ndiSdkDirOptions.add(file("/Library/NDI SDK for Apple").toPath())
+        }
+
+        if(ndiSdkDirOptions.size() == 0) {
             throw new IllegalStateException("NDI SDK not found: NDI_SDK_DIR environment variable does not exist.")
         }
 
-        def ndiSdkPath = file(System.getenv("NDI_SDK_DIR")).toPath();
+        def ndiSdkPath = ndiSdkDirOptions.get(0);
         def ndiIncludePath
 
         if(Files.exists(ndiSdkPath.resolve("Include"))) {

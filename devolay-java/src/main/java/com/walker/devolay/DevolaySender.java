@@ -123,12 +123,12 @@ public class DevolaySender extends DevolayFrameCleaner implements AutoCloseable 
 
     @Override
     void freeVideo(DevolayVideoFrame videoFrame) {
-
+        throw new UnsupportedOperationException("Cannot free DevolayVideoFrame using DevolaySender. This should be unreachable, please open an issue at https://github.com/WalkerKnapp/devolay/issues.");
     }
 
     @Override
     void freeAudio(DevolayAudioFrame audioFrame) {
-
+        throw new UnsupportedOperationException("Cannot free DevolayAudioFrame using DevolaySender. This should be unreachable, please open an issue at https://github.com/WalkerKnapp/devolay/issues.");
     }
 
     @Override

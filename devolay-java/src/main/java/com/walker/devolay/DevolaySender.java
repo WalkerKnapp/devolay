@@ -3,7 +3,7 @@ package com.walker.devolay;
 /**
  * Equivalent to NDIlib_send_instance_t
  */
-public class DevolaySender implements AutoCloseable {
+public class DevolaySender extends DevolayFrameCleaner implements AutoCloseable {
 
     /**
      * Holds the reference to the NDIlib_send_instance_t object
@@ -99,10 +99,41 @@ public class DevolaySender implements AutoCloseable {
         return new DevolaySource(getSource(ndilibSendInstancePointer));
     }
 
+    public DevolayFrameType receiveCapture(DevolayMetadataFrame metadataFrame, int timeout) {
+        if(metadataFrame != null) {
+            metadataFrame.freeBuffer();
+        }
+
+        int type = capture(ndilibSendInstancePointer,
+                metadataFrame == null ? 0L : metadataFrame.structPointer,
+                timeout);
+
+        DevolayFrameType frameType = DevolayFrameType.valueOf(type);
+        if (frameType == DevolayFrameType.METADATA && metadataFrame != null) {
+            metadataFrame.allocatedBufferSource.set(this);
+        }
+        return frameType;
+    }
+
     @Override
     public void close() {
         // TODO: Auto-clean resources.
         sendDestroy(ndilibSendInstancePointer);
+    }
+
+    @Override
+    void freeVideo(DevolayVideoFrame videoFrame) {
+
+    }
+
+    @Override
+    void freeAudio(DevolayAudioFrame audioFrame) {
+
+    }
+
+    @Override
+    void freeMetadata(DevolayMetadataFrame metadataFrame) {
+        freeMetadata(ndilibSendInstancePointer, metadataFrame.structPointer);
     }
 
     // Native Methods
@@ -132,4 +163,9 @@ public class DevolaySender implements AutoCloseable {
     private static native void setFailover(long sendInstance, long failoverSourceInstance);
 
     private static native long getSource(long sendInstance);
+
+    private static native int capture(long sendInstance, long metadataFrame, int timeout);
+    private static native void freeMetadata(long structPointer, long pMetadata);
+
+
 }

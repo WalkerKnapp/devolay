@@ -95,3 +95,14 @@ void Java_com_walker_devolay_DevolaySender_setFailover(JNIEnv *env, jclass jClaz
 jlong Java_com_walker_devolay_DevolaySender_getSource(JNIEnv *env, jclass jClazz, jlong pSender) {
     return (jlong) getNDILib()->send_get_source_name(reinterpret_cast<NDIlib_send_instance_t>(pSender));
 }
+
+jint Java_com_walker_devolay_DevolaySender_capture(JNIEnv *env, jclass jClazz, jlong pSender, jlong pMetadataFrame, jint timeout) {
+    return getNDILib()->send_capture(reinterpret_cast<NDIlib_send_instance_t *>(pSender),
+                                  reinterpret_cast<NDIlib_metadata_frame_t *>(pMetadataFrame),
+                                  timeout);
+}
+
+void Java_com_walker_devolay_DevolaySender_freeMetadata(JNIEnv *env, jclass jClazz, jlong pSender, jlong pMetadataFrame) {
+    getNDILib()->recv_free_metadata(reinterpret_cast<NDIlib_send_instance_t *>(pSender),
+                              reinterpret_cast<NDIlib_metadata_frame_t *>(pMetadataFrame));
+}

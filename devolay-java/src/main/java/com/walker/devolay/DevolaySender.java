@@ -87,7 +87,7 @@ public class DevolaySender extends DevolayFrameCleaner implements AutoCloseable 
      * @param frame A filled video frame to send that cannot be freed or re-used until a synchronizing event, or null to trigger a synchronization.
      */
     public void sendVideoFrameAsync(DevolayVideoFrame frame) {
-        sendVideoAsyncV2(ndilibSendInstancePointer, frame.structPointer);
+        sendVideoAsyncV2(ndilibSendInstancePointer, frame == null ? 0 : frame.structPointer);
     }
 
     /**
@@ -196,7 +196,7 @@ public class DevolaySender extends DevolayFrameCleaner implements AutoCloseable 
      * @param source A failover source to use, or {@code null} to remove any failover sources.
      */
     public void setFailoverSource(DevolaySource source) {
-        setFailover(ndilibSendInstancePointer, source.structPointer);
+        setFailover(ndilibSendInstancePointer, source == null ? 0 : source.structPointer);
     }
 
     /**

@@ -96,10 +96,10 @@ jlong Java_com_walker_devolay_DevolaySender_getSource(JNIEnv *env, jclass jClazz
     return (jlong) getNDILib()->send_get_source_name(reinterpret_cast<NDIlib_send_instance_t>(pSender));
 }
 
-jint Java_com_walker_devolay_DevolaySender_capture(JNIEnv *env, jclass jClazz, jlong pSender, jlong pMetadataFrame, jint timeout) {
+jint Java_com_walker_devolay_DevolaySender_sendCapture(JNIEnv *env, jclass jClazz, jlong pSender, jlong pMetadataFrame, jint jTimeout) {
     return getNDILib()->send_capture(reinterpret_cast<NDIlib_send_instance_t *>(pSender),
-                                  reinterpret_cast<NDIlib_metadata_frame_t *>(pMetadataFrame),
-                                  timeout);
+                                     reinterpret_cast<NDIlib_metadata_frame_t *>(pMetadataFrame),
+                                     jTimeout);
 }
 
 void Java_com_walker_devolay_DevolaySender_freeMetadata(JNIEnv *env, jclass jClazz, jlong pSender, jlong pMetadataFrame) {

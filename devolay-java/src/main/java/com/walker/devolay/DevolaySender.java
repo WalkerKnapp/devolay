@@ -136,6 +136,33 @@ public class DevolaySender extends DevolayFrameCleaner implements AutoCloseable 
     }
 
     /**
+     * Receives a frame of metadata from any receivers connected to this sender.
+     *
+     * Frames that are filled with data MUST be later cleared, with calling {@link DevolayMetadataFrame#freeBuffer()}, {@link DevolayMetadataFrame#close}, or with a try-with-resources.
+     *
+     * This method will free any previously allocated data from all frames, even if data is not written to a given frame.
+     *
+     * @param metadataFrame A metadata frame to put data into. Any existing data will be replaced. If null, no data will not be captured.
+     * @param timeout A timeout in milliseconds for the capture.
+     * @return {@link DevolayFrameType#METADATA} if a frame was captured, or {@link DevolayFrameType#NONE} otherwise.
+     */
+    public DevolayFrameType sendCapture(DevolayMetadataFrame metadataFrame, int timeout) {
+        if(metadataFrame != null) {
+            metadataFrame.freeBuffer();
+        }
+
+        int type = sendCapture(ndilibSendInstancePointer,
+                metadataFrame == null ? 0L : metadataFrame.structPointer,
+                timeout);
+
+        DevolayFrameType frameType = DevolayFrameType.valueOf(type);
+        if (frameType == DevolayFrameType.METADATA && metadataFrame != null) {
+            metadataFrame.allocatedBufferSource.set(this);
+        }
+        return frameType;
+    }
+
+    /**
      * Queries the current talley state of this sender (if it is on the main program, or preview).
      *
      * By setting timeoutMs to 0, this function will immediately query the state of the sender, but by specifying a timeout,
@@ -208,33 +235,6 @@ public class DevolaySender extends DevolayFrameCleaner implements AutoCloseable 
         return new DevolaySource(getSource(ndilibSendInstancePointer));
     }
 
-    /**
-     * Receives a frame of metadata from any receivers connected to this sender.
-     *
-     * Frames that are filled with data MUST be later cleared, with calling {@link DevolayMetadataFrame#freeBuffer()}, {@link DevolayMetadataFrame#close}, or with a try-with-resources.
-     *
-     * This method will free any previously allocated data from all frames, even if data is not written to a given frame.
-     *
-     * @param metadataFrame A metadata frame to put data into. Any existing data will be replaced. If null, no data will not be captured.
-     * @param timeout A timeout in milliseconds for the capture.
-     * @return {@link DevolayFrameType#METADATA} if a frame was captured, or {@link DevolayFrameType#NONE} otherwise.
-     */
-    public DevolayFrameType receiveCapture(DevolayMetadataFrame metadataFrame, int timeout) {
-        if(metadataFrame != null) {
-            metadataFrame.freeBuffer();
-        }
-
-        int type = capture(ndilibSendInstancePointer,
-                metadataFrame == null ? 0L : metadataFrame.structPointer,
-                timeout);
-
-        DevolayFrameType frameType = DevolayFrameType.valueOf(type);
-        if (frameType == DevolayFrameType.METADATA && metadataFrame != null) {
-            metadataFrame.allocatedBufferSource.set(this);
-        }
-        return frameType;
-    }
-
     @Override
     public void close() {
         // TODO: Auto-clean resources.
@@ -273,6 +273,9 @@ public class DevolaySender extends DevolayFrameCleaner implements AutoCloseable 
 
     private static native void sendMetadata(long sendInstance, long metadataFrameInstance);
 
+    private static native int sendCapture(long sendInstance, long metadataFrame, int timeout);
+    private static native void freeMetadata(long structPointer, long pMetadata);
+
     private static native byte getTally(long sendInstance, int timeoutMs);
 
     private static native int getNoConnections(long sendInstance, int timeoutMs);
@@ -283,9 +286,5 @@ public class DevolaySender extends DevolayFrameCleaner implements AutoCloseable 
     private static native void setFailover(long sendInstance, long failoverSourceInstance);
 
     private static native long getSource(long sendInstance);
-
-    private static native int capture(long sendInstance, long metadataFrame, int timeout);
-    private static native void freeMetadata(long structPointer, long pMetadata);
-
 
 }

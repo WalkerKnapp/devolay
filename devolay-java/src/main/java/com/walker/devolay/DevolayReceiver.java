@@ -1,13 +1,27 @@
 package com.walker.devolay;
 
+/**
+ * A structure to connect to and receive frames from {@link DevolaySource} instances.
+ */
 public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseable {
-    // Receive only metadata
+    /**
+     * A bandwidth mode to receive only metadata from a source.
+     */
     public static final int RECEIVE_BANDWIDTH_METADATA_ONLY = -10;
-    // Receive only audio and metadata
+
+    /**
+     * A bandwidth mode to receive only audio from a source.
+     */
     public static final int RECEIVE_BANDWIDTH_AUDIO_ONLY = 10;
-    // Receive metadata, audio, and video at a lower bandwidth and resolution
+
+    /**
+     * A bandwidth mode to receive at the lowest supported quality from a source
+     */
     public static final int RECEIVE_BANDWIDTH_LOWEST = 0;
-    // Receive metadata, audio, and video at full resolution
+
+    /**
+     * A bandwidth mode to receive at the highest supported quality from a source.
+     */
     public static final int RECEIVE_BANDWIDTH_HIGHEST = 100;
 
     public enum ColorFormat {
@@ -62,6 +76,22 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
      */
     final long ndilibRecievePointer;
 
+    /**
+     * Creates and allocates a receiver instance attached to a given source.
+     * The source can be disconnected or changed later without recreating the instance.
+     *
+     * The color format selected with this constructor is only a preference, but may fail to apply on certain platforms.
+     * With obscure color formats, the color format of each frame received should be checked with {@link DevolayVideoFrame#getFourCCType()}
+     *
+     * The bandwidth selected with this constructor will modify the compression level and resolution of the source.
+     * This is useful for receiving on low-bandwidth connections, such as over WIFI.
+     *
+     * @param source The source to attach the receiver to.
+     * @param colorFormat The color format to transcode received frames to. It is recommended to use {@link DevolayReceiver.ColorFormat#FASTEST}
+     * @param receiveBandwidth The bandwidth to receive video at. This can be selected from {@link DevolayReceiver#RECEIVE_BANDWIDTH_METADATA_ONLY}, {@link DevolayReceiver#RECEIVE_BANDWIDTH_AUDIO_ONLY}, {@link DevolayReceiver#RECEIVE_BANDWIDTH_LOWEST}, or {@link DevolayReceiver#RECEIVE_BANDWIDTH_HIGHEST}.
+     * @param allowVideoFields Either false to receive only progressive frames (de-interlaced in the receiver), or true to be able to receive both interlaced and progressive frames.
+     * @param name The name of the receiver to create. May be null to use a generated name.
+     */
     public DevolayReceiver(DevolaySource source, ColorFormat colorFormat, int receiveBandwidth, boolean allowVideoFields, String name) {
         // TODO: Implement this forced reference more effectively
         Devolay.loadLibraries();
@@ -69,10 +99,27 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
         this.ndilibRecievePointer = receiveCreate(source.structPointer, colorFormat.id, receiveBandwidth, allowVideoFields, name);
     }
 
+    /**
+     * Creates and allocates a receiver instance attached to a given source.
+     * The source can be disconnected or changed later without recreating the instance.
+     *
+     * The receiver will receive the {@link ColorFormat#UYVY_BGRA} color format, using the {@link DevolayReceiver#RECEIVE_BANDWIDTH_HIGHEST} bandwidth,
+     * allows fielded video, and uses a generated name.
+     *
+     * @param source The source to attach the receiver to.
+     */
     public DevolayReceiver(DevolaySource source) {
         this(source, ColorFormat.UYVY_BGRA, RECEIVE_BANDWIDTH_HIGHEST, true, null);
     }
 
+    /**
+     * Creates and allocates a receiver that is not connected to a source.
+     *
+     * @param colorFormat The color format to transcode received frames to. It is recommended to use {@link DevolayReceiver.ColorFormat#FASTEST}
+     * @param receiveBandwidth The bandwidth to receive video at. This can be selected from {@link DevolayReceiver#RECEIVE_BANDWIDTH_METADATA_ONLY}, {@link DevolayReceiver#RECEIVE_BANDWIDTH_AUDIO_ONLY}, {@link DevolayReceiver#RECEIVE_BANDWIDTH_LOWEST}, or {@link DevolayReceiver#RECEIVE_BANDWIDTH_HIGHEST}.
+     * @param allowVideoFields Either false to receive only progressive frames (de-interlaced in the receiver), or true to be able to receive both interlaced and progressive frames.
+     * @param name The name of the receiver to create. May be null to use a generated name.
+     */
     public DevolayReceiver(ColorFormat colorFormat, int receiveBandwidth, boolean allowVideoFields, String name) {
         // TODO: Implement this forced reference more effectively
         Devolay.loadLibraries();
@@ -80,6 +127,12 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
         this.ndilibRecievePointer = receiveCreate(0L, colorFormat.id, receiveBandwidth, allowVideoFields, name);
     }
 
+    /**
+     * Creates and allocates a receiver that is not connected to a source.
+     *
+     * The receiver will receive the {@link ColorFormat#UYVY_BGRA} color format, using the {@link DevolayReceiver#RECEIVE_BANDWIDTH_HIGHEST} bandwidth,
+     * allows fielded video, and uses a generated name.
+     */
     public DevolayReceiver() {
         // TODO: Implement this forced reference more effectively
         Devolay.loadLibraries();
@@ -91,7 +144,7 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
      * Changes the connection to another video source, or disconnects it by passing null.
      * Allows you to preserve a receiver instead of creating new ones.
      *
-     * @param source The source to connect to, or null
+     * @param source The source to connect to, or null to disconnect.
      */
     public void connect(DevolaySource source) {
         receiveConnect(ndilibRecievePointer, source.structPointer);
@@ -102,10 +155,10 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
      * Any of the frames can be replaced with null, data will not be captured for those types in this call.
      * This call can be called simultaneously on separate threads to receive audio, video, and metadata separately.
      *
-     * This will return DevolayFrameType#NONE if no data is received in the timeout span.
-     * This will return DevolayFrameType#ERROR if the connection is lost.
+     * This will return {@link DevolayFrameType#NONE} if no data is received in the timeout span.
+     * This will return {@link DevolayFrameType#ERROR} if the connection is lost.
      *
-     * Frames that are filled with data MUST be later manually cleared, with calling #freeBuffer, #close, or with a try-with-resources
+     * Frames that are filled with data MUST be later manually cleared, with calling {@link DevolayVideoFrame#freeBuffer()}, {@link DevolayVideoFrame#close}, or with a try-with-resources.
      *
      * This method will free any previously allocated data from all frames, even if data is not written to a given frame.
      *
@@ -114,7 +167,7 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
      * @param metadataFrame A metadata frame to put data into. Any existing data will be replaced. If null, metadata will not be captured.
      * @param timeout A timeout in milliseconds for the capture
      *
-     * @return The frame type that was captured, DevolayFrameType#NONE, or DevolayFrameType#ERROR
+     * @return The frame type that was captured, {@link DevolayFrameType#NONE}, or {@link DevolayFrameType#ERROR}
      */
     public DevolayFrameType receiveCapture(DevolayVideoFrame videoFrame, DevolayAudioFrame audioFrame, DevolayMetadataFrame metadataFrame, int timeout) {
         if(videoFrame != null) {
@@ -159,7 +212,7 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
     // TODO: NDIlib_recv_set_tally
 
     /**
-     * Fills in a DevolayPerformanceData structure with performance information about the receiver.
+     * Fills in a {@link DevolayPerformanceData} structure with performance information about the receiver.
      * This can be useful to tell if the processing of data is keeping up with real-time.
      *
      * @param performanceData The performance structure to fill
@@ -173,7 +226,7 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
     // TODO: NDIlib_recv_get_queue
 
     /**
-     * Connection based metadata (send automatically when a new connection is received) is cleared.
+     * Clear all connection based metadata (send automatically when a new connection is created).
      */
     public void clearConnectionMetadata() {
         receiveClearConnectionMetadata(ndilibRecievePointer);
@@ -201,7 +254,7 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
      * Gets the URL that can be used for configuration of this input.
      * This may return null if there is no web interface.
      * The return otherwise will be a fully formed URL, for instance "http://10.28.1.192/configuration/"
-     * To avoid the need to poll this function, you can monitor #receiveCapture for a DevolayFrameType.STATUS_CHANGE
+     * To avoid the need to poll this function, you can monitor {@link DevolayReceiver#receiveCapture(DevolayVideoFrame, DevolayAudioFrame, DevolayMetadataFrame, int)} for a {@link DevolayFrameType#STATUS_CHANGE}
      *
      * @return The URL to the web interface for this source. May be null.
      */
@@ -231,6 +284,7 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
     }
 
     // Native methods
+
     private static native long receiveCreate(long pSource, int colorFormat, int receiveBandwidth, boolean allowVideoFields, String name);
     private static native long receiveCreateDefaultSettings();
     private static native void receiveDestroy(long structPointer);

@@ -1,10 +1,17 @@
 package com.walker.devolay;
 
+/**
+ * Stores data about total and dropped video/audio/metadata frames. This structure is only updated when used as an
+ * argument for {@link DevolayReceiver#queryPerformance(DevolayPerformanceData)}
+ */
 public class DevolayPerformanceData implements AutoCloseable {
 
     final long totalPerformanceStructPointer;
     final long droppedPerformanceStructPointer;
 
+    /**
+     * Creates and allocates a {@link DevolayPerformanceData} structure. This can be reused until closed.
+     */
     public DevolayPerformanceData() {
         // TODO: Implement this forced reference more effectively
         Devolay.loadLibraries();

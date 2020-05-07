@@ -9,10 +9,10 @@ public class DevolayFinder implements AutoCloseable {
     private DevolaySource[] previouslyQueriedSources;
 
     /**
-     * Creates a NDIlib_find_create_t instance, and uses it to initialize the internal NDIlib_send_instance_t object.
+     * Creates a DevolayFinder instance.
      *
      * @param showLocalSources If NDI sources running on the local machine should be included.
-     * @param groups The groups this DevolayFinder should query for.
+     * @param groups A comma-separated list of groups this {@link DevolayFinder} should query for.
      * @param extraIps A comma-separated list of IP addresses NDI should additionally query for. See Processing.NDI.Find.h
      */
     public DevolayFinder(boolean showLocalSources, String groups, String extraIps) {
@@ -22,14 +22,29 @@ public class DevolayFinder implements AutoCloseable {
         this.ndiLibFindInstancePointer = findCreate(showLocalSources, groups, extraIps);
     }
 
+    /**
+     * Creates a {@link DevolayFinder} instance, with no additional IP addresses queried.
+     *
+     * @param showLocalSources If NDI sources running on the local machine should be included.
+     * @param groups A comma-separated list of groups this {@link DevolayFinder} should query for.
+     */
     public DevolayFinder(boolean showLocalSources, String groups) {
         this(showLocalSources, groups, null);
     }
 
+    /**
+     * Creates a {@link DevolayFinder} instance, with no additional IP addresses queried or restrictions on queried groups.
+     *
+     * @param showLocalSources If NDI sources running on the local machine should be included
+     */
     public DevolayFinder(boolean showLocalSources) {
         this(showLocalSources, null, null);
     }
 
+    /**
+     * Creates a {@link DevolayFinder} instance, with no additional IP addresses queried, no restrictions on queried groups,
+     * and with sources running on the local machine included.
+     */
     public DevolayFinder() {
         // TODO: Implement this forced reference more effectively
         Devolay.loadLibraries();
@@ -38,11 +53,11 @@ public class DevolayFinder implements AutoCloseable {
     }
 
     /**
-     * Queries for sources that are currently active and visible to this DevolayFinder instance.
-     * The DevolaySource instances created with this method are only valid until
-     * the next DevolayFinder#getCurrentSources or DevolayFinder#close call.
+     * Queries for sources that are currently active and visible to this {@link DevolayFinder} instance.
+     * The {@link DevolaySource} instances created with this method are only valid until
+     * the next DevolayFinder#getCurrentSources() or {@link DevolayFinder#close} call.
      *
-     * @return An array of DevolaySources with information about each current source.
+     * @return An array of {@link DevolaySource}s with information about each current source.
      */
     public synchronized DevolaySource[] getCurrentSources() {
         if(previouslyQueriedSources != null) {
@@ -83,6 +98,7 @@ public class DevolayFinder implements AutoCloseable {
     }
 
     // Native Methods
+
     private static native long findCreate(boolean showLocalSources, String groups, String extraIps);
     // Should offer a small performance/memory improvement over using #findCreate with the default values.
     private static native long findCreateDefaultSettings();

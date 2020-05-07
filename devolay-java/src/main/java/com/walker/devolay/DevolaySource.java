@@ -8,6 +8,11 @@ public class DevolaySource implements AutoCloseable {
 
     final long structPointer;
 
+    /**
+     * Creates a source instance from a pointer to the internal source object.
+     *
+     * @param pointer The pointer to the internal source object.
+     */
     DevolaySource(long pointer) {
         // TODO: Implement this forced reference more effectively
         Devolay.loadLibraries();
@@ -16,6 +21,11 @@ public class DevolaySource implements AutoCloseable {
         this.structPointer = pointer;
     }
 
+    /**
+     * Returns the name of this source instance.
+     *
+     * @return The current name of this source.
+     */
     public String getSourceName() {
         if(isClosed.get()) {
             throw new IllegalStateException("Cannot access attribute of closed DevolaySource. Please read the javadocs for DevolayFinder#getCurrentSources");
@@ -30,6 +40,8 @@ public class DevolaySource implements AutoCloseable {
 
         isClosed.set(true);
     }
+
+    // Native methods
 
     private static native void deallocSource(long pointer);
 

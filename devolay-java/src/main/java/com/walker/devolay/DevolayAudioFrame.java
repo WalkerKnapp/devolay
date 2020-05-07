@@ -74,7 +74,7 @@ public class DevolayAudioFrame implements AutoCloseable {
     /**
      * Sets the audio data to a floating-point, planar DIRECT buffer.
      *
-     * Most audio will consist of interleaved data, so should use DevolayUtilities.interleavedFloatToPlanarFloat
+     * Most audio will consist of interleaved data, so should use {@link DevolayUtilities#interleavedFloatToPlanarFloat(DevolayAudioFrameInterleaved32f, DevolayAudioFrame)} interleavedFloatToPlanarFloat}
      * before setting.
      *
      * @param data A planar ByteBuffer of floating point samples. MUST be a direct ByteBuffer.
@@ -88,8 +88,8 @@ public class DevolayAudioFrame implements AutoCloseable {
     }
 
     /**
-     * If a buffer is allocated by a Devolay process (DevolayReceiver#receiveCapture), free the buffer.
-     * This allows a previously used frame to be reused in DevolayReceiver#receiveCapture
+     * If a buffer is allocated by a Devolay process (e.g. {@link DevolayReceiver#receiveCapture(DevolayVideoFrame, DevolayAudioFrame, DevolayMetadataFrame, int)}), free the buffer.
+     * This allows a previously used frame to be reused in {@link  DevolayReceiver#receiveCapture(DevolayVideoFrame, DevolayAudioFrame, DevolayMetadataFrame, int)} or {@link DevolayFrameSync#captureAudio(DevolayAudioFrame, int, int, int)}
      */
     public void freeBuffer() {
         if(allocatedBufferSource.get() != null) {

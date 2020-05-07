@@ -66,6 +66,7 @@ public class DevolayUtilities {
     }
 
     // Native methods
+
     private static native void convertToInterleaved16s(long pSrcFrame, long pDstFrame);
     private static native void convertFromInterleaved16s(long pSrcFrame, long pDstFrame);
     private static native void convertToInterleaved32s(long pSrcFrame, long pDstFrame);

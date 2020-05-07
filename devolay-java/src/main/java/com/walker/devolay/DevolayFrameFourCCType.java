@@ -1,5 +1,9 @@
 package com.walker.devolay;
 
+/**
+ * Represents the color format of any given frame. It is recommended, when able, to use the UYVY or UYVA color formats,
+ * but if this format is not available, it is better to allow NDI to internally convert it using hardware acceleration.
+ */
 public enum DevolayFrameFourCCType {
     // YCbCr color space
     UYVY('U', 'Y', 'V', 'Y'),
@@ -28,6 +32,13 @@ public enum DevolayFrameFourCCType {
         id = (c1 & 0xFF) | ((c2 & 0xFF) << 8) | ((c3 & 0xFF) << 16) | ((c4 & 0xFF) << 24);
     }
 
+    /**
+     * Queries the {@link DevolayFrameFourCCType} based on the FourCC ID.
+     * Returns null if an ID is not supported.
+     *
+     * @param id The FourCC ID to lookup.
+     * @return The enum instance representing the FourCC type.
+     */
     public static DevolayFrameFourCCType valueOf(int id) {
         if(id == UYVY.id) {
             return UYVY;

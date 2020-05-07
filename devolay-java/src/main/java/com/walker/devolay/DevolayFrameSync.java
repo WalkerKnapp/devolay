@@ -80,7 +80,7 @@ public class DevolayFrameSync extends DevolayFrameCleaner implements AutoCloseab
      * Pull video samples from the frame-sync queue.
      * This function will always return immediately, using time-base correction if needed.
      *
-     * The FrameFormatType can be specified, which is then used to return the best possible frame.
+     * The {@link DevolayFrameFormatType} can be specified, which is then used to return the best possible frame.
      * Note that field-based frame-sync means that the frame-sync attempts to match the fielded input
      * phase with the frame requests so you have the most correct ordering on output.
      *
@@ -108,7 +108,7 @@ public class DevolayFrameSync extends DevolayFrameCleaner implements AutoCloseab
      * Pull video samples from the frame-sync queue.
      * This function will always return immediately, using time-base correction if needed.
      *
-     * This function will get frames formatted as {@code DevolayFrameFormatType.PROGRESSIVE}
+     * This function will get frames formatted as {@link DevolayFrameFormatType#PROGRESSIVE}
      * Note: The same frame can be returned multiple times.
      *
      * If no video frames have been received, this will return false, and have a {@code null} video data.

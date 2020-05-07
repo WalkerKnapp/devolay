@@ -1,5 +1,9 @@
 package com.walker.devolay;
 
+/**
+ * Represents the scan type of any given frame. Can either represent a progressive frame, a fielded frame, or individual
+ * fields of an interlaced frame.
+ */
 public enum DevolayFrameFormatType {
     /**
      * A progressive frame
@@ -23,6 +27,13 @@ public enum DevolayFrameFormatType {
         this.id = id;
     }
 
+    /**
+     * Queries the {@link DevolayFrameFormatType} based on an ID value.
+     * Throws an {@link IllegalArgumentException} when an unsupported ID is given.
+     *
+     * @param id The internal ID of the requested frame format type.
+     * @return The enum instance of the represented type.
+     */
     public static DevolayFrameFormatType valueOf(int id) {
         if(id == PROGRESSIVE.id) {
             return PROGRESSIVE;

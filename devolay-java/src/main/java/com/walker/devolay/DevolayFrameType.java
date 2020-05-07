@@ -1,5 +1,8 @@
 package com.walker.devolay;
 
+/**
+ * Represents the type of an arbitrary frame provided by Devolay.
+ */
 public enum DevolayFrameType {
     NONE(0),
     VIDEO(1),
@@ -9,7 +12,7 @@ public enum DevolayFrameType {
 
     /**
      * Indicates that the settings on the input have changed.
-     * This will be returned from DevolayReceiver#receiveCapture when a device is known
+     * This will be returned from {@link DevolayReceiver#receiveCapture} when a device is known
      * to have new settings, for instance the web URL has changed or the device is now
      * a PTZ camera.
      */
@@ -21,6 +24,13 @@ public enum DevolayFrameType {
         this.id = id;
     }
 
+    /**
+     * Queries the {@link DevolayFrameType} based on an internal ID.
+     * Throws an {@link IllegalArgumentException} for an unsupported ID.
+     *
+     * @param id The internal ID to query for.
+     * @return The enum instance representing the frame type.
+     */
     public static DevolayFrameType valueOf(int id) {
         switch (id) {
             case 0: return NONE;

@@ -6,7 +6,7 @@
 
 #include <Processing.NDI.Lib.h>
 #ifdef __int64
-typedef __int64_t __int64;
+typedef __int64 __int64_t;
 #endif
 #include <jni.h>
 

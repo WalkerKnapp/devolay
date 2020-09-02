@@ -3,6 +3,7 @@ import org.gradle.api.JavaVersion
 
 import com.jfrog.bintray.gradle.BintrayExtension
 
+import java.nio.file.Files
 import java.io.FileReader
 import java.util.Properties
 import java.util.Date
@@ -120,12 +121,24 @@ tasks.register<Exec>("generateJniHeaders") {
 
 tasks.processResources {
     dependsOn(":devolay-natives:assembleNatives")
-}
 
-sourceSets {
-    main {
-        resources {
-            srcDirs("src/main/resources", project(":devolay-natives").buildDir.absolutePath + "/lib/main/debug")
+    val releases = file(project(":devolay-natives").buildDir.absolutePath + "/lib/main/release")
+
+    // Lift the stripped binaries into the jar
+
+    releases.listFiles().forEach { os ->
+        os.listFiles().forEach { arch ->
+            if (Files.exists(arch.toPath().resolve("stripped"))) {
+                from(files(arch.toPath().resolve("stripped"))) {
+                    include("*.so", "*.dll", "*.dylib")
+                    into("natives/" + os.name + "/" + arch.name)
+                }
+            } else {
+                from(files(arch.toPath())) {
+                    include("*.so", "*.dll", "*.dylib")
+                    into("natives/" + os.name + "/" + arch.name)
+                }
+            }
         }
     }
 }

@@ -9,29 +9,60 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Devolay {
 
-    private static AtomicBoolean librariesLoaded = new AtomicBoolean(false);
+    private static final AtomicBoolean librariesLoaded = new AtomicBoolean(false);
 
     static {
         final String libraryName = System.mapLibraryName("devolay-natives");
         final String libraryExtension = libraryName.substring(libraryName.indexOf('.'));
 
-        try(InputStream is = Devolay.class.getResourceAsStream("/" + libraryName)) {
+        final String osNameProperty = System.getProperty("os.name").toLowerCase();
+        String osDirectory;
+        if (osNameProperty.contains("nix") || osNameProperty.contains("nux")) {
+            osDirectory = "linux";
+        } else if (osNameProperty.contains("win")) {
+            osDirectory = "windows";
+        } else if (osNameProperty.contains("mac")) {
+            osDirectory = "macos";
+        } else {
+            throw new IllegalStateException("Unsupported OS: " + osNameProperty + ". Please open an issue at https://github.com/WalkerKnapp/devolay/issues");
+        }
 
+        final String osArchProperty = System.getProperty("os.arch").toLowerCase();
+        String archDirectory;
+        if (osArchProperty.contains("64")) {
+            archDirectory = "x86-64";
+        } else if (osArchProperty.contains("86")) {
+            archDirectory = "x86";
+        } else {
+            throw new IllegalStateException("Unsupported Arch: " + osArchProperty + ". Please open an issue at https://github.com/WalkerKnapp/devolay/issues");
+        }
+
+        try(InputStream is = Devolay.class.getResourceAsStream("/natives/" + osDirectory + "/" + archDirectory + "/" + libraryName)) {
             if(is == null) {
                 throw new IllegalStateException("This build of Devolay is not compiled for your OS. Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.");
             }
 
+            // Copy the natives to a temp file to be loaded
             Path tempPath = Files.createTempFile("devolay-natives", libraryExtension);
             Files.copy(is, tempPath, StandardCopyOption.REPLACE_EXISTING);
             System.load(tempPath.toAbsolutePath().toString());
+
+            // Delete the natives when exiting
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    Files.delete(tempPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
 
 
-        // The libraries are not correctly installed.
         int ret = loadLibraries();
         if(ret != 0) {
+            // The libraries are not correctly installed.
             if(ret == -1) {
                 throw new IllegalStateException("The NDI(tm) SDK libraries were not found.");
             } else if(ret == -2) {

@@ -30,11 +30,13 @@ open class ToolchainConfiguration : RuleSource() {
             }
 
             register<Clang>("osxcross") {
-                target("macos_x86-64") {
+                target("macos_x86-64") { this as org.gradle.nativeplatform.toolchain.internal.gcc.DefaultGccPlatformToolChain
                     getcCompiler().executable = "o64-clang"
                     cppCompiler.executable = "o64-clang++"
                     linker.executable = "o64-clang++"
                     assembler.executable = "o64-clang"
+                    symbolExtractor.executable = "x86_64-apple-darwin19-dsymutil"
+                    stripper.executable = "x86_64-apple-darwin19-strip"
                 }
             }
         }
@@ -46,24 +48,26 @@ apply("plugin" to ToolchainConfiguration::class.java)
 plugins {
     `cpp-library`
     id("de.undercouch.download") version "4.0.4"
+    id("com.dorongold.task-tree") version "1.5"
 }
 
 // Download gulrak/filesystem to replace c++17"s filesystem if not supported by the current system.
-val downloadedHeadersPath = buildDir.toPath().resolve("headers").toFile()
-downloadedHeadersPath.mkdirs()
+val downloadedHeadersPath: File = buildDir.toPath().resolve("headers").toFile()
+val ghcPath: File = buildDir.toPath().resolve("headers").resolve("ghc").toFile()
+ghcPath.mkdirs()
 
 tasks.register<Download>("downloadNativeDependencies") {
     src("https://github.com/gulrak/filesystem/releases/download/v1.3.2/filesystem.hpp")
-    dest(downloadedHeadersPath)
+    dest(ghcPath)
     overwrite(false)
 }
 
-tasks.assemble {
-    dependsOn("downloadNativeDependencies")
+tasks.assembleNatives {
     dependsOn(":devolay-java:generateJniHeaders")
 }
 
 tasks.withType(CppCompile::class).configureEach {
+    dependsOn("downloadNativeDependencies")
     compilerArgs.addAll(toolChain.map { toolChain ->
         when (toolChain) {
             is VisualCpp -> listOf("/std:c++latest")

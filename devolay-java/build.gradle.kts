@@ -119,7 +119,7 @@ tasks.register<Exec>("generateJniHeaders") {
 }
 
 tasks.processResources {
-    dependsOn(":devolay-natives:assemble")
+    dependsOn(":devolay-natives:assembleNatives")
 }
 
 sourceSets {

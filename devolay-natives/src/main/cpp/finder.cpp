@@ -2,7 +2,7 @@
 
 #include "com_walker_devolay_DevolayFinder.h"
 
-jlong Java_com_walker_devolay_DevolayFinder_findCreate(JNIEnv *env, jclass jClazz, jboolean jShowLocalSources, jstring jGroups, jstring jExtraIps) {
+JNIEXPORT jlong JNICALL Java_com_walker_devolay_DevolayFinder_findCreate(JNIEnv *env, jclass jClazz, jboolean jShowLocalSources, jstring jGroups, jstring jExtraIps) {
     auto *NDI_find_create = new NDIlib_find_create_t();
 
     NDI_find_create->show_local_sources = jShowLocalSources;
@@ -24,7 +24,7 @@ jlong Java_com_walker_devolay_DevolayFinder_findCreate(JNIEnv *env, jclass jClaz
     return (jlong) ret;
 }
 
-jlong Java_com_walker_devolay_DevolayFinder_findCreateDefaultSettings(JNIEnv *env, jclass jClazz) {
+JNIEXPORT jlong JNICALL Java_com_walker_devolay_DevolayFinder_findCreateDefaultSettings(JNIEnv *env, jclass jClazz) {
     auto *NDI_find_create = new NDIlib_find_create_t();
 
     auto *ret = getNDILib()->find_create_v2(NDI_find_create);
@@ -32,11 +32,11 @@ jlong Java_com_walker_devolay_DevolayFinder_findCreateDefaultSettings(JNIEnv *en
     return (jlong) ret;
 }
 
-void Java_com_walker_devolay_DevolayFinder_findDestroy(JNIEnv *env, jclass jClazz, jlong pFind) {
+JNIEXPORT void JNICALL Java_com_walker_devolay_DevolayFinder_findDestroy(JNIEnv *env, jclass jClazz, jlong pFind) {
     getNDILib()->find_destroy(reinterpret_cast<NDIlib_find_instance_t>(pFind));
 }
 
-jlongArray Java_com_walker_devolay_DevolayFinder_findGetCurrentSources(JNIEnv *env, jclass jClazz, jlong pFind) {
+JNIEXPORT jlongArray JNICALL Java_com_walker_devolay_DevolayFinder_findGetCurrentSources(JNIEnv *env, jclass jClazz, jlong pFind) {
     uint32_t no_sources = 0;
     const NDIlib_source_t* p_sources = getNDILib()->find_get_current_sources(reinterpret_cast<NDIlib_find_instance_t>(pFind), &no_sources);
 
@@ -49,6 +49,6 @@ jlongArray Java_com_walker_devolay_DevolayFinder_findGetCurrentSources(JNIEnv *e
     return ret;
 }
 
-jboolean Java_com_walker_devolay_DevolayFinder_findWaitForSources(JNIEnv *env, jclass jClazz, jlong pFind, jint jTimeout) {
+JNIEXPORT jboolean JNICALL Java_com_walker_devolay_DevolayFinder_findWaitForSources(JNIEnv *env, jclass jClazz, jlong pFind, jint jTimeout) {
     return getNDILib()->find_wait_for_sources(reinterpret_cast<NDIlib_find_instance_t>(pFind), jTimeout);
 }

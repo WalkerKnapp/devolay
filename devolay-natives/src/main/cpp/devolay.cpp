@@ -36,7 +36,7 @@ const NDIlib_v3 *getNDILib() {
     return ndiLib;
 }
 
-jint Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz) {
+JNIEXPORT jint JNICALL Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz) {
     std::vector<std::string> locations;
 
     char *redistFolder = getenv(NDILIB_REDIST_FOLDER);
@@ -113,10 +113,10 @@ jint Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz)
     return -1;
 }
 
-jstring Java_com_walker_devolay_Devolay_nGetVersion(JNIEnv *env, jclass jClazz) {
+JNIEXPORT jstring JNICALL Java_com_walker_devolay_Devolay_nGetVersion(JNIEnv *env, jclass jClazz) {
     return env->NewStringUTF(getNDILib()->version());
 }
 
-jboolean Java_com_walker_devolay_Devolay_nIsSupportedCpu(JNIEnv *env, jclass jClazz) {
+JNIEXPORT jboolean JNICALL Java_com_walker_devolay_Devolay_nIsSupportedCpu(JNIEnv *env, jclass jClazz) {
     return getNDILib()->is_supported_CPU();
 }

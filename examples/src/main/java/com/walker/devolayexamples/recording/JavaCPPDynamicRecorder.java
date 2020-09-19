@@ -32,11 +32,11 @@ import static org.bytedeco.ffmpeg.global.swscale.*;
 
 public class JavaCPPDynamicRecorder {
 
-    private static final List<AVCodec> preferredVideoCodecs = List.of(
+    private static final List<AVCodec> preferredVideoCodecs = Arrays.asList(
             avcodec_find_encoder(AV_CODEC_ID_H265),
             avcodec_find_encoder(AV_CODEC_ID_H264),
             avcodec_find_encoder(AV_CODEC_ID_VP9));
-    private static final List<AVCodec> preferredAudioCodecs = List.of(
+    private static final List<AVCodec> preferredAudioCodecs = Arrays.asList(
             avcodec_find_encoder(AV_CODEC_ID_FLAC),
             avcodec_find_encoder(AV_CODEC_ID_WAVPACK),
             avcodec_find_encoder(AV_CODEC_ID_AAC));

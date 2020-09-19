@@ -5,6 +5,7 @@ import org.gradle.nativeplatform.toolchain.internal.tools.ToolSearchPath;
 import org.gradle.nativeplatform.toolchain.internal.ToolType;
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 // For some reason, the compiler plugins (giving NativeToolChainRegistry the compiler factories) don't run
 // until after the build script is evaluated, so we have to set up our toolchains as a part of a @Mutate rule.
@@ -191,16 +192,16 @@ open class ToolchainConfiguration : RuleSource() {
 
     private fun locateAndroidNdk(): Path? {
         // Check system property
-        var androidNdk = if (System.getProperty("androidNdk") != null) Path.of(System.getProperty("androidNdk")) else null
+        var androidNdk = if (System.getProperty("androidNdk") != null) Paths.get(System.getProperty("androidNdk")) else null
 
         // Check "ANDROID_NDK_ROOT" environment variable
         if (androidNdk == null && System.getenv("ANDROID_NDK_ROOT") != null) {
-            androidNdk = Path.of(System.getenv("ANDROID_NDK_ROOT"))
+            androidNdk = Paths.get(System.getenv("ANDROID_NDK_ROOT"))
         }
 
         // Check the working directory
         if (androidNdk == null) {
-            Files.list(Path.of(".")).forEach {
+            Files.list(Paths.get(".")).forEach {
                 if (it.fileName.startsWith("android-ndk")) {
                     androidNdk = it
                 }

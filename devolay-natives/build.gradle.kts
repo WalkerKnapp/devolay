@@ -66,18 +66,16 @@ val downloadedHeadersPath: File = buildDir.toPath().resolve("headers").toFile()
 val ghcPath: File = buildDir.toPath().resolve("headers").resolve("ghc").toFile()
 ghcPath.mkdirs()
 
-tasks.register<Download>("downloadNativeDependencies") {
+val downloadNativeDependencies by tasks.registering(Download::class) {
     src("https://github.com/gulrak/filesystem/releases/download/v1.3.2/filesystem.hpp")
     dest(ghcPath)
     overwrite(false)
 }
 
-tasks.assembleNatives {
-    dependsOn(":devolay-java:generateJniHeaders")
-}
-
 tasks.withType(CppCompile::class).configureEach {
-    dependsOn("downloadNativeDependencies")
+    dependsOn(":devolay-java:generateJniHeaders")
+    dependsOn(downloadNativeDependencies)
+
     compilerArgs.addAll(toolChain.map { toolChain ->
         when (toolChain) {
             is VisualCpp -> listOf("/std:c++latest")
@@ -104,7 +102,7 @@ library {
         }
 
         // Include our downloaded headers
-        from(files(downloadedHeadersPath))
+        from(downloadedHeadersPath)
 
         // Include NDI headers
         from(files(locateNdiIncludes()))
@@ -154,4 +152,35 @@ fun locateNdiIncludes(): Path {
             throw IllegalStateException("NDI SDK at $ndiSdk is invalid: Has no 'include' or 'Include' subdirectory.")
         }
     }
+}
+
+// Add artifacts for devolay-java to depend on
+val assembleNativeArtifacts by tasks.registering(Jar::class) {
+    archiveBaseName.set("devolay-native-artifacts")
+    destinationDirectory.set(temporaryDir)
+
+    components.withType(ComponentWithBinaries::class).forEach { component ->
+        (component as ComponentWithBinaries).binaries.whenElementFinalized(ComponentWithOutputs::class.java) {
+            if (this is ComponentWithNativeRuntime) {
+                val machine = this.targetMachine
+
+                // Only include release binaries
+                if (this.isOptimized) {
+                    dependsOn(this.outputs)
+                    from(this.outputs) {
+                        into("natives/" + machine.operatingSystemFamily.name + "/" + machine.architecture.name)
+                    }
+                }
+            }
+        }
+    }
+}
+
+val nativeArtifacts: Configuration? by configurations.creating {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+}
+
+artifacts {
+    add("nativeArtifacts", assembleNativeArtifacts)
 }

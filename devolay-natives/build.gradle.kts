@@ -1,6 +1,8 @@
 import de.undercouch.gradle.tasks.download.Download
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.nativeplatform.toolchain.internal.tools.ToolSearchPath;
+import org.gradle.nativeplatform.toolchain.internal.ToolType;
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -9,6 +11,7 @@ import java.nio.file.Path
 
 open class ToolchainConfiguration : RuleSource() {
     @Mutate fun NativeToolChainRegistry.configureToolchains() {
+        // On linux, compile using gcc, mingw, and osxcross
         if (OperatingSystem.current().isLinux) {
             register<Gcc>("gcc") {
                 target("linux_x86-64")
@@ -29,15 +32,22 @@ open class ToolchainConfiguration : RuleSource() {
                 }
             }
 
-            register<Clang>("osxcross") {
-                target("macos_x86-64") { this as org.gradle.nativeplatform.toolchain.internal.gcc.DefaultGccPlatformToolChain
-                    getcCompiler().executable = "o64-clang"
-                    cppCompiler.executable = "o64-clang++"
-                    linker.executable = "o64-clang++"
-                    assembler.executable = "o64-clang"
-                    symbolExtractor.executable = "x86_64-apple-darwin19-dsymutil"
-                    stripper.executable = "x86_64-apple-darwin19-strip"
+            // Gradle doesn't check that xcrun exists if there is a macos target specified, so do that check and only
+            // register the target if it exists
+            if (ToolSearchPath(OperatingSystem.current()).locate(ToolType.C_COMPILER, "xcrun").isAvailable) {
+                register<Clang>("osxcross") {
+                    target("macos_x86-64") {
+                        this as org.gradle.nativeplatform.toolchain.internal.gcc.DefaultGccPlatformToolChain
+                        getcCompiler().executable = "o64-clang"
+                        cppCompiler.executable = "o64-clang++"
+                        linker.executable = "o64-clang++"
+                        assembler.executable = "o64-clang"
+                        symbolExtractor.executable = "x86_64-apple-darwin19-dsymutil"
+                        stripper.executable = "x86_64-apple-darwin19-strip"
+                    }
                 }
+            } else {
+                println("Osxcross is not present, these builds will not be compatible with Macos.")
             }
         }
     }
@@ -144,5 +154,4 @@ fun locateNdiIncludes(): Path {
             throw IllegalStateException("NDI SDK at $ndiSdk is invalid: Has no 'include' or 'Include' subdirectory.")
         }
     }
-
 }

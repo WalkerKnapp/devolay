@@ -238,19 +238,8 @@ val downloadNativeDependencies by tasks.registering(Download::class) {
     dest(temporaryDir)
     overwrite(false)
 
+    outputs.file(temporaryDir.resolve("filesystem.hpp"))
     outputs.dir(temporaryDir)
-}
-
-tasks.withType(CppCompile::class).configureEach {
-    dependsOn(":devolay-java:generateJniHeaders")
-
-    compilerArgs.addAll(toolChain.map { toolChain ->
-        when (toolChain) {
-            is VisualCpp -> listOf("/std:c++latest")
-            is GccCompatibleToolChain -> listOf("-lstdc++", "-std=c++17", "-lstdc++fs", "-static")
-            else -> listOf()
-        }
-    })
 }
 
 library {

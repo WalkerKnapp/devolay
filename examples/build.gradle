@@ -3,7 +3,7 @@ plugins {
     id 'application'
 }
 
-sourceCompatibility = 9
+sourceCompatibility = JavaVersion.VERSION_1_8
 mainClassName = 'com.walker.devolayexamples.SendAudioExample'
 
 repositories {

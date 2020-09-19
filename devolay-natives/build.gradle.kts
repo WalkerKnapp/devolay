@@ -58,23 +58,19 @@ apply("plugin" to ToolchainConfiguration::class.java)
 plugins {
     `cpp-library`
     id("de.undercouch.download") version "4.0.4"
-    id("com.dorongold.task-tree") version "1.5"
 }
 
-// Download gulrak/filesystem to replace c++17"s filesystem if not supported by the current system.
-val downloadedHeadersPath: File = buildDir.toPath().resolve("headers").toFile()
-val ghcPath: File = buildDir.toPath().resolve("headers").resolve("ghc").toFile()
-ghcPath.mkdirs()
-
+// Download gulrak/filesystem to replace c++17's filesystem if not supported by the current system.
 val downloadNativeDependencies by tasks.registering(Download::class) {
     src("https://github.com/gulrak/filesystem/releases/download/v1.3.2/filesystem.hpp")
-    dest(ghcPath)
+    dest(temporaryDir)
     overwrite(false)
+
+    outputs.dir(temporaryDir)
 }
 
 tasks.withType(CppCompile::class).configureEach {
     dependsOn(":devolay-java:generateJniHeaders")
-    dependsOn(downloadNativeDependencies)
 
     compilerArgs.addAll(toolChain.map { toolChain ->
         when (toolChain) {
@@ -102,7 +98,7 @@ library {
         }
 
         // Include our downloaded headers
-        from(downloadedHeadersPath)
+        from(downloadNativeDependencies)
 
         // Include NDI headers
         from(files(locateNdiIncludes()))

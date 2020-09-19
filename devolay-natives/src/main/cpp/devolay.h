@@ -5,9 +5,14 @@
 #include <cstddef>
 
 #include <Processing.NDI.Lib.h>
+
 #ifdef __int64
-typedef __int64 __int64_t;
+#define __int64_t __int64
 #endif
+#ifndef __int64
+#define __int64 long long
+#endif
+
 #include <jni.h>
 
 extern const NDIlib_v3 *getNDILib();

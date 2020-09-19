@@ -11,7 +11,8 @@
 #include <dlfcn.h>
 #endif
 
-#include <ghc/filesystem.hpp>
+#define GHC_WITH_EXCEPTIONS
+#include <filesystem.hpp>
 namespace fs = ghc::filesystem;
 
 #include "../headers/com_walker_devolay_Devolay.h"

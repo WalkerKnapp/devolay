@@ -215,8 +215,10 @@ open class ToolchainConfiguration : RuleSource() {
         val prebuilts = androidNdk?.resolve("toolchains")?.resolve("llvm")?.resolve("prebuilt")
         var bin: Path? = null
 
-        Files.list(prebuilts).findFirst().ifPresent {
-            bin = it.resolve("bin")
+        if (prebuilts != null) {
+            Files.list(prebuilts).findFirst().ifPresent {
+                bin = it.resolve("bin")
+            }
         }
 
         return bin

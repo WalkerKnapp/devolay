@@ -50,13 +50,40 @@ Devolay aims to be close to the original NDI SDK while still following Java stan
 Example can be found in [examples/src/main/java/com/walker/devolayexamples](https://github.com/WalkerKnapp/devolay/tree/master/examples/src/main/java/com/walker/devolayexamples).
 
 ## Compiling
-Compiling is fairly simple, using Gradle's native build model.
+
+### Linux or WSL (Recommended)
 
 #### Requirements
 
+##### Targeting any platform
 - [The NewTek NDI SDK (v4.0 or higher)](https://www.ndi.tv/sdk/)
-- [A Gradle-compatible C++ Toolchain](https://docs.gradle.org/current/userguide/building_cpp_projects.html#sec:cpp_supported_tool_chain)
-- Git
+- git
+- openjdk-11-jdk
+
+##### Targeting Linux
+- gcc
+
+##### Targeting Windows
+- mingw-w64
+
+##### Targeting MacOS
+- [osxcross](https://github.com/tpoechtrager/osxcross)
+
+##### Targeting Android
+- libc6-dev-i386
+- [Android NDK](https://developer.android.com/ndk/downloads)
+
+##### Targeting IOS/tvOS
+Targeting tvOS or iOS is theoretically possible, but not configured, as I don't have access to either platform to test. If you need support for these platforms and would be willing to help, please open an issue.
+
+In theory, these dependencies would be needed:
+- [An XCode DMG](https://developer.apple.com/xcode/download) (Note: This requires a free Apple ID)
+- libfuse-dev
+- libicu-dev
+- openssl
+- zlib1g
+- libbz2-dev
+- cctools-port (Instructions for setup can be found [here](https://web.archive.org/web/20200902224950/https://github.com/tpoechtrager/osxcross/issues/45#issuecomment-138351002). If you have xcode as a *.xip file instead of a *.dmg, use [these instructions](https://web.archive.org/web/20200902224812/https://github.com/bitcoin/bitcoin/issues/8748#issuecomment-247745279) to unzip it.)
 
 #### Building
 

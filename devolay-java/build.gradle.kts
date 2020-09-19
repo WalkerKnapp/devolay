@@ -107,6 +107,9 @@ val generateJniHeaders by tasks.registering(Exec::class) {
     //val nativeIncludes = "../devolay-natives/src/main/headers"
 
     doFirst {
+        temporaryDir.resolve("classes").mkdirs()
+        temporaryDir.resolve("headers").mkdirs()
+
         val javacCommand = mutableListOf(Jvm.current().javacExecutable.toString(),
                 "-d",
                 temporaryDir.resolve("classes").absolutePath,

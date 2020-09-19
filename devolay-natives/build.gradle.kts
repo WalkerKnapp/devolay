@@ -1,8 +1,8 @@
 import de.undercouch.gradle.tasks.download.Download
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.nativeplatform.toolchain.internal.tools.ToolSearchPath;
-import org.gradle.nativeplatform.toolchain.internal.ToolType;
+import org.gradle.nativeplatform.toolchain.internal.tools.ToolSearchPath
+import org.gradle.nativeplatform.toolchain.internal.ToolType
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths

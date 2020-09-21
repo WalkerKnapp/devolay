@@ -374,12 +374,15 @@ public class JavaCPPDynamicRecorder {
                 throw new IllegalStateException("Failed to make audio frame writable: " + translateError(ret));
             }
 
-            // Resample the data from the devolay frame to the ffmpeg frame. Repeats until enough frames have been filled to hold the entire frame.
-            int samples = swr_convert(swrContext,
-                    postResampleAudioFrame.data(), postResampleAudioFrame.nb_samples(),
+            // Queue the audio data from the devolay frame in the swrContext
+            swr_convert(swrContext,
+                    postResampleAudioFrame.data(), 0,
                     splitAudioPlanes(audioFrame.getData(), audioFrame.getChannels(), audioFrame.getChannelStride()), audioFrame.getSamples());
 
-            for(int i = 0; (i + postResampleAudioFrame.nb_samples()) < audioFrame.getSamples(); i += postResampleAudioFrame.nb_samples()) {
+            // Fill up all the ffmpeg frames we can with the queued audio
+            while(swr_get_delay(swrContext, audioTargetInfo.sampleRate) >= postResampleAudioFrame.nb_samples()) {
+                swr_convert(swrContext, postResampleAudioFrame.data(), postResampleAudioFrame.nb_samples(), null, 0);
+
                 postResampleAudioFrame.pts(sampleCount += postResampleAudioFrame.nb_samples());
 
                 // Submit the frame to encode
@@ -398,13 +401,6 @@ public class JavaCPPDynamicRecorder {
                             throw new IllegalStateException("Failed to write audio frame: " + translateError(ret));
                         }
                     }
-                }
-
-                samples = swr_convert(swrContext,
-                        postResampleAudioFrame.data(), postResampleAudioFrame.nb_samples(), null, 0);
-
-                if(samples <= 0) {
-                    break;
                 }
             }
         }

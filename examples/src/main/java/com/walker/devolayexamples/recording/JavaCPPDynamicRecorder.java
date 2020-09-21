@@ -110,7 +110,6 @@ public class JavaCPPDynamicRecorder {
     private Set<AVCodec> availableAudioCodecs = new TreeSet<>(Comparator.comparingInt(AVCodec::id));
 
     public void setup(String muxerName, Path outputFile) throws IOException {
-
         av_log_set_level(AV_LOG_TRACE);
 
         format = av_guess_format(muxerName, outputFile.getFileName().toString(), null);
@@ -169,13 +168,6 @@ public class JavaCPPDynamicRecorder {
             }
             formatContext.pb(avioContext);
         }
-
-        int ret;
-        if((ret = avformat_write_header(formatContext, (AVDictionary)null)) < 0) {
-            throw new IllegalStateException("Failed to write content header: " + translateError(ret));
-        }
-
-        contextOpened = true;
     }
 
     public void processVideoFrame(DevolayVideoFrame videoFrame) {

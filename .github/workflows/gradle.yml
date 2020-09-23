@@ -28,7 +28,7 @@ jobs:
         cd osxcross
         sudo apt update
         sudo ./tools/get_dependencies.sh
-        curl -L -o ./tarballs/MacOSX10.8.sdk.tar.xz https://s3.amazonaws.com/andrew-osx-sdks/MacOSX${OSXCROSS_SDK_VERSION}.sdk.tar.xz
+        curl -L -o ./tarballs/MacOSX10.8.sdk.tar.xz https://s3.amazonaws.com/andrew-osx-sdks/MacOSX10.8.sdk.tar.xz
         yes | PORTABLE=true ./build.sh
         export PATH=$PATH:./target/bin
 

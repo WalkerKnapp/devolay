@@ -291,7 +291,7 @@ plugins {
 val downloadNativeDependencies by tasks.registering(Download::class) {
     src("https://github.com/gulrak/filesystem/releases/download/v1.3.2/filesystem.hpp")
     dest(temporaryDir)
-    overwrite(false)
+    overwrite(true)
 
     outputs.file(temporaryDir.resolve("filesystem.hpp"))
     outputs.dir(temporaryDir)

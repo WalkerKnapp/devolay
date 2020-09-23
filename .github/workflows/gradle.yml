@@ -26,6 +26,7 @@ jobs:
       run: |
         git clone https://github.com/tpoechtrager/osxcross.git
         cd osxcross
+        sudo apt update
         sudo ./tools/get_dependencies.sh
         curl -L -o ./tarballs/MacOSX10.15.sdk.tar.xz https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.15.sdk.tar.xz
         yes | PORTABLE=true ./build.sh

@@ -7,6 +7,16 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
+// Kotlin has issues if we try to get the working directory from inside a RuleSource, so put it in a static field.
+class BuildContext {
+    companion object {
+        @JvmStatic
+        lateinit var workingDirectory: File
+    }
+}
+
+BuildContext.workingDirectory = file("..")
+
 // For some reason, the compiler plugins (giving NativeToolChainRegistry the compiler factories) don't run
 // until after the build script is evaluated, so we have to set up our toolchains as a part of a @Mutate rule.
 
@@ -33,10 +43,11 @@ open class ToolchainConfiguration : RuleSource() {
                 }
             }
 
-            // Gradle doesn't check that xcrun exists if there is a macos target specified, so do that check and only
-            // register the target if it exists
-            if (ToolSearchPath(OperatingSystem.current()).locate(ToolType.C_COMPILER, "xcrun").isAvailable) {
+            val osxcrossBin = locateOsxCross()
+            if (osxcrossBin != null) {
                 register<Clang>("osxcross") {
+                    path(osxcrossBin)
+
                     target("macos_x86-64") {
                         this as org.gradle.nativeplatform.toolchain.internal.gcc.DefaultGccPlatformToolChain
                         getcCompiler().executable = "o64-clang"
@@ -47,8 +58,6 @@ open class ToolchainConfiguration : RuleSource() {
                         stripper.executable = "x86_64-apple-darwin19-strip"
                     }
                 }
-            } else {
-                println("Osxcross is not present, these builds will not be compatible with Macos.")
             }
         }
 
@@ -205,7 +214,7 @@ open class ToolchainConfiguration : RuleSource() {
 
         // Check the working directory
         if (androidNdk == null) {
-            Files.list(Paths.get(".")).forEach {
+            Files.list(BuildContext.workingDirectory.toPath()).forEach {
                 if (it.fileName.startsWith("android-ndk")) {
                     androidNdk = it
                 }
@@ -226,6 +235,33 @@ open class ToolchainConfiguration : RuleSource() {
         }
 
         return bin
+    }
+
+    private fun locateOsxCross(): Path? {
+        // Check system property
+        var osxcross = if (System.getProperty("osxcrossBin") != null) Paths.get(System.getProperty("osxcrossBin")) else null
+
+        // Check the working directory
+        if (osxcross == null) {
+            Files.list(BuildContext.workingDirectory.toPath()).forEach {
+                if (it.fileName.startsWith("osxcross")) {
+                    osxcross = it.resolve("target").resolve("bin")
+                }
+            }
+        }
+
+        // Check the system path
+        val searchResult = ToolSearchPath(OperatingSystem.current()).locate(ToolType.C_COMPILER, "xcrun")
+        if (osxcross == null && searchResult.isAvailable) {
+            osxcross = searchResult.tool.parentFile.toPath();
+        }
+
+
+        if (osxcross == null) {
+            System.err.println("No Osxcross found, Macos builds will be unavailable. Please add the osxcross/target/bin path to your PATH variable, run gradle with -Dosxcross=<Bin Path>, or symlink the install path to your \"devolay\" folder.")
+        }
+
+        return osxcross
     }
 }
 apply("plugin" to ToolchainConfiguration::class.java)

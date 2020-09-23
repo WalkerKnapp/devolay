@@ -7,8 +7,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name:
+    - name: Install Mingw
       run: sudo apt install mingw-w64
+
     - uses: actions/checkout@v2
     - name: Set up JDK 8
       uses: actions/setup-java@v1
@@ -25,12 +26,9 @@ jobs:
       run: |
         git clone https://github.com/tpoechtrager/osxcross.git
         cd osxcross
-        git checkout 474f359d2f27ff68916a064f0138c9188c63db7d
-        sed -i -e 's|-march=native||g' ./build_clang.sh ./wrapper/build.sh
-        ./tools/get_dependencies.sh
+        sudo ./tools/get_dependencies.sh
         curl -L -o ./tarballs/MacOSX10.15.sdk.tar.xz https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.15.sdk.tar.xz
         yes | PORTABLE=true ./build.sh
-        ./build_compiler_rt.sh
         export PATH=$PATH:./target/bin
 
     - name: Grant execute permission for gradlew

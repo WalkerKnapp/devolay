@@ -22,16 +22,16 @@ jobs:
 
     # Setup osxcross, as detailed here: https://github.com/andrew-d/docker-osxcross/blob/master/Dockerfile
     - name: Setup OSXCross
-      run: >
-      git clone https://github.com/tpoechtrager/osxcross.git &&
-      cd osxcross &&
-      git checkout 474f359d2f27ff68916a064f0138c9188c63db7d &&
-      sed -i -e 's|-march=native||g' ./build_clang.sh ./wrapper/build.sh &&
-      ./tools/get_dependencies.sh &&
-      curl -L -o ./tarballs/MacOSX10.15.sdk.tar.xz https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.15.sdk.tar.xz &&
-      yes | PORTABLE=true ./build.sh &&
-      ./build_compiler_rt.sh &&
-      export PATH=$PATH:./target/bin
+      run: |
+        git clone https://github.com/tpoechtrager/osxcross.git
+        cd osxcross
+        git checkout 474f359d2f27ff68916a064f0138c9188c63db7d
+        sed -i -e 's|-march=native||g' ./build_clang.sh ./wrapper/build.sh
+        ./tools/get_dependencies.sh
+        curl -L -o ./tarballs/MacOSX10.15.sdk.tar.xz https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.15.sdk.tar.xz
+        yes | PORTABLE=true ./build.sh
+        ./build_compiler_rt.sh
+        export PATH=$PATH:./target/bin
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew

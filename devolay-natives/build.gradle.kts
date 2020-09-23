@@ -242,6 +242,16 @@ val downloadNativeDependencies by tasks.registering(Download::class) {
     outputs.dir(temporaryDir)
 }
 
+tasks.withType(CppCompile::class).configureEach {
+    compilerArgs.addAll(toolChain.map { toolChain ->
+        when (toolChain) {
+            is VisualCpp -> listOf("/std:c++11")
+            is GccCompatibleToolChain -> listOf("-lstdc++", "-std=c++11")
+            else -> listOf()
+        }
+    })
+}
+
 library {
     targetMachines.set(listOf(
             machines.windows.x86, machines.windows.x86_64,

@@ -3,6 +3,7 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.nativeplatform.toolchain.internal.tools.ToolSearchPath
 import org.gradle.nativeplatform.toolchain.internal.ToolType
+import org.gradle.nativeplatform.toolchain.internal.gcc.AbstractGccCompatibleToolChain
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -45,8 +46,22 @@ open class ToolchainConfiguration : RuleSource() {
 
             val osxcrossBin = locateOsxCross()
             if (osxcrossBin != null) {
-                register<Clang>("osxcross") {
+                register<Clang>("osxcross") { this as AbstractGccCompatibleToolChain
                     path(osxcrossBin)
+
+                    // Hack into the toolchain internals a bit to set a cached location for our SDK libraries, since
+                    // gradle tries to run xcrun without using the path we set.
+                    val sdkDirs = File(osxcrossBin.parent.resolve("SDK").toString()).listFiles()
+
+                    if (sdkDirs != null && sdkDirs.isNotEmpty()) {
+                        val sLD = AbstractGccCompatibleToolChain::class.java.getDeclaredField("standardLibraryDiscovery")
+                        sLD.isAccessible = true
+                        val pathLocator = org.gradle.nativeplatform.toolchain.internal.gcc.metadata.SystemLibraryDiscovery::class.java.getDeclaredField("macOSSdkPathLocator");
+                        pathLocator.isAccessible = true
+                        val cachedLocation = org.gradle.nativeplatform.toolchain.internal.xcode.AbstractLocator::class.java.getDeclaredField("cachedLocation");
+                        cachedLocation.isAccessible = true
+                        cachedLocation.set(pathLocator.get(sLD.get(this)), sdkDirs[0])
+                    }
 
                     target("macos_x86-64") {
                         this as org.gradle.nativeplatform.toolchain.internal.gcc.DefaultGccPlatformToolChain

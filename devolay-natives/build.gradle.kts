@@ -199,6 +199,10 @@ open class ToolchainConfiguration : RuleSource() {
             androidNdk = Paths.get(System.getenv("ANDROID_NDK_ROOT"))
         }
 
+        if (androidNdk == null && System.getenv("ANDROID_NDK_HOME") != null) {
+            androidNdk = Paths.get(System.getenv("ANDROID_NDK_HOME"))
+        }
+
         // Check the working directory
         if (androidNdk == null) {
             Files.list(Paths.get(".")).forEach {
@@ -209,7 +213,7 @@ open class ToolchainConfiguration : RuleSource() {
         }
 
         if (androidNdk == null) {
-            System.err.println("No Android NDK found, android builds will be unavailable. Please set the ANDROID_NDK_ROOT variable to the install location, run gradle with -DandroidNdk=<Install Path>, or symlink the install path to your \"devolay\" folder.")
+            System.err.println("No Android NDK found, android builds will be unavailable. Please set the ANDROID_NDK_ROOT or ANDROID_NDK_HOME variables to the install location, run gradle with -DandroidNdk=<Install Path>, or symlink the install path to your \"devolay\" folder.")
         }
 
         val prebuilts = androidNdk?.resolve("toolchains")?.resolve("llvm")?.resolve("prebuilt")

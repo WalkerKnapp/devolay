@@ -15,7 +15,7 @@ jobs:
     - name: Download the NDI SDK
       run: wget http://new.tk/NDISDKLINUX && tar -xvf NDISDKLINUX
     - name: Install the NDI SDK
-      run: yes | bash ./InstallNDISDK_v4_Linux.sh > /dev/null
+      run: yes | ./InstallNDISDK_v4_Linux.sh > /dev/null
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle

@@ -15,7 +15,7 @@
 #include <filesystem.hpp>
 namespace fs = ghc::filesystem;
 
-#include "../headers/com_walker_devolay_Devolay.h"
+#include "../headers/me_walkerknapp_devolay_Devolay.h"
 
 static const NDIlib_v3 *ndiLib = (NDIlib_v3 *)calloc(1, sizeof(NDIlib_v3));
 
@@ -23,7 +23,7 @@ const NDIlib_v3 *getNDILib() {
     return ndiLib;
 }
 
-JNIEXPORT jint JNICALL Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz) {
+JNIEXPORT jint JNICALL Java_me_walkerknapp_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz) {
     std::vector<std::string> locations;
 
     char *redistFolder = getenv(NDILIB_REDIST_FOLDER);
@@ -100,10 +100,10 @@ JNIEXPORT jint JNICALL Java_com_walker_devolay_Devolay_nLoadLibraries(JNIEnv * e
     return -1;
 }
 
-JNIEXPORT jstring JNICALL Java_com_walker_devolay_Devolay_nGetVersion(JNIEnv *env, jclass jClazz) {
+JNIEXPORT jstring JNICALL Java_me_walkerknapp_devolay_Devolay_nGetVersion(JNIEnv *env, jclass jClazz) {
     return env->NewStringUTF(getNDILib()->version());
 }
 
-JNIEXPORT jboolean JNICALL Java_com_walker_devolay_Devolay_nIsSupportedCpu(JNIEnv *env, jclass jClazz) {
+JNIEXPORT jboolean JNICALL Java_me_walkerknapp_devolay_Devolay_nIsSupportedCpu(JNIEnv *env, jclass jClazz) {
     return getNDILib()->is_supported_CPU();
 }

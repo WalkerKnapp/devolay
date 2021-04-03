@@ -3,6 +3,6 @@ plugins {
 }
 
 allprojects {
-    group = "com.walker"
+    group = "me.walkerknapp"
     version = "1.2.0"
 }

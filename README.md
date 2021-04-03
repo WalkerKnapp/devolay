@@ -47,7 +47,7 @@ In pom.xml:
 ## Usage
 Devolay aims to be close to the original NDI SDK while still following Java standards and conventions. The vast majority of applications can be simply translated from NDI SDK calls to Devolay calls.
 
-Example can be found in [examples/src/main/java/com/walker/devolayexamples](https://github.com/WalkerKnapp/devolay/tree/master/examples/src/main/java/com/walker/devolayexamples).
+Example can be found in [examples/src/main/java/me/walkerknapp/devolayexamples](https://github.com/WalkerKnapp/devolay/tree/master/examples/src/main/java/me/walkerknapp/devolayexamples).
 
 ## Compiling
 

@@ -16,20 +16,27 @@ jobs:
       with:
         java-version: 8
 
-    - name: Download the NDI SDK
-      run: wget http://new.tk/NDISDKLINUX && tar -xvf NDISDKLINUX
-    - name: Install the NDI SDK
-      run: yes | ./InstallNDISDK_v4_Linux.sh > /dev/null
+    - uses: actions/cache@v2
+      id: cacheNDI
+      with:
+        path: 'NDI SDK for Linux'
+        key: ${{ runner.os }}-ndi
+
+    - name: Setup the NDI SDK
+      if: steps.cacheNDI.outputs.cache-hit != 'true'
+      run: |
+        wget http://new.tk/NDISDKLINUX && tar -xvf NDISDKLINUX
+        yes | ./InstallNDISDK_v4_Linux.sh > /dev/null
 
     - uses: actions/cache@v2
-      id: cache
+      id: cachetoolchain
       with:
         path: osxcross
         key: ${{ runner.os }}-osxtoolchain
 
     # Setup osxcross, as detailed here: https://github.com/andrew-d/docker-osxcross/blob/master/Dockerfile
     - name: Setup OSXCross
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cachetoolchain.outputs.cache-hit != 'true'
       run: |
         git clone -n https://github.com/tpoechtrager/osxcross.git
         cd osxcross

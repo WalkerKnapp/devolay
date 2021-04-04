@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Mingw
+    - name: Install Dependencies
       run: sudo apt install mingw-w64
 
     - uses: actions/checkout@v2
@@ -24,12 +24,14 @@ jobs:
     # Setup osxcross, as detailed here: https://github.com/andrew-d/docker-osxcross/blob/master/Dockerfile
     - name: Setup OSXCross
       run: |
-        git clone https://github.com/tpoechtrager/osxcross.git
+        git clone -n https://github.com/tpoechtrager/osxcross.git
         cd osxcross
+        git checkout 364703ca0962c4a12688daf8758802a5df9e3221
         sudo apt update
         sudo ./tools/get_dependencies.sh
         curl -L -o ./tarballs/MacOSX10.15.sdk.tar.xz https://github.com/xorrior/osxsdk/raw/master/MacOSX10.15.sdk.tar.xz
         yes | PORTABLE=true ./build.sh
+        yes | PORTABLE=true ./build_binutils.sh
         export PATH=$PATH:./target/bin
 
     - name: Grant execute permission for gradlew

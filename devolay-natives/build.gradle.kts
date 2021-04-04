@@ -47,7 +47,7 @@ open class ToolchainConfiguration : RuleSource() {
             val osxcrossBin = locateOsxCross()
             if (osxcrossBin != null) {
                 register<Clang>("osxcross") { this as AbstractGccCompatibleToolChain
-                    path(osxcrossBin)
+                    path(osxcrossBin, osxcrossBin.resolve("../binutils/bin"))
 
                     // Hack into the toolchain internals a bit to set a cached location for our SDK libraries, since
                     // gradle tries to run xcrun without using the path we set.
@@ -69,7 +69,7 @@ open class ToolchainConfiguration : RuleSource() {
                         cppCompiler.executable = "o64-clang++"
                         linker.executable = "o64-clang++"
                         assembler.executable = "o64-clang"
-                        symbolExtractor.executable = "x86_64-apple-darwin19-dsymutil"
+                        symbolExtractor.executable = "x86_64-apple-darwin19-objcopy"
                         stripper.executable = "x86_64-apple-darwin19-strip"
                     }
                 }

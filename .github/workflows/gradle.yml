@@ -21,8 +21,15 @@ jobs:
     - name: Install the NDI SDK
       run: yes | ./InstallNDISDK_v4_Linux.sh > /dev/null
 
+    - uses: actions/cache@v2
+      id: cache
+      with:
+        path: osxcross
+        key: ${{ runner.os }}-osxtoolchain
+
     # Setup osxcross, as detailed here: https://github.com/andrew-d/docker-osxcross/blob/master/Dockerfile
     - name: Setup OSXCross
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         git clone -n https://github.com/tpoechtrager/osxcross.git
         cd osxcross
@@ -32,7 +39,9 @@ jobs:
         curl -L -o ./tarballs/MacOSX10.15.sdk.tar.xz https://github.com/xorrior/osxsdk/raw/master/MacOSX10.15.sdk.tar.xz
         yes | PORTABLE=true ./build.sh
         yes | PORTABLE=true ./build_binutils.sh
-        export PATH=$PATH:./target/bin
+    - name: Add OSXCross to path
+      run: |
+        export PATH=$PATH:./osxcross/target/bin
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew

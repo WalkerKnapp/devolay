@@ -387,7 +387,8 @@ val assembleNativeArtifacts by tasks.registering(Jar::class) {
                 val machine = this.targetMachine
 
                 // Only include release binaries
-                if (this.isOptimized) {
+                if (this.isOptimized && !this.getName().toLowerCase().contains("debug")) {
+                    print(this.getName())
                     dependsOn(this.outputs)
                     from(this.outputs) {
                         into("natives/" + machine.operatingSystemFamily.name + "/" + machine.architecture.name)

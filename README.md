@@ -1,53 +1,36 @@
-# Devolay  [ ![Download](https://api.bintray.com/packages/walkerknapp/devolay/devolay/images/download.svg) ](https://bintray.com/walkerknapp/devolay/devolay/_latestVersion)
-Java bindings for the Newtek NDI(tm) SDK. For more information about NDI(tm), see:
+# Devolay
+A Java library for sending and receiving video over the network using the Newtek NDI(tm) SDK. For more information about NDI(tm), see:
 
 http://NDI.NewTek.com/
 
 ## Download / Installation
-Currently, Devolay is only actively tested on Windows, but bintray builds include Windows, Linux, and MacOS builds.
+Currently, Devolay is only actively tested on Windows, but builds include Windows, Linux, and MacOS binaries.
 If you have any issues unique to the Linux or MacOS builds, please [open an issue](https://github.com/WalkerKnapp/devolay/issues) so they can be resolved in the next version.
 
 ### Gradle
 ```groovy
 repositories {
-    maven {
-        url  "https://dl.bintray.com/walkerknapp/devolay"
-    }
+    mavenCentral()
 }
 
 dependencies {
-    implementation 'com.walker:devolay:1.2.0'
+    implementation 'me.walkerknapp:devolay:2.0.0'
 }
 ```
 
 ### Maven
-In settings.xml:
-```xml
-<repositories>
-    <repository>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-        <id>bintray-walkerknapp-devolay</id>
-        <name>bintray</name>
-        <url>https://dl.bintray.com/walkerknapp/devolay</url>
-    </repository>
-</repositories>
-```
-In pom.xml:
 ```xml
 <dependency>
-  <groupId>com.walker</groupId>
+  <groupId>me.walkerknapp</groupId>
   <artifactId>devolay</artifactId>
-  <version>1.2.0</version>
-  <type>pom</type>
+  <version>2.0.0</version>
 </dependency>
 ```
 
 ## Usage
 Devolay aims to be close to the original NDI SDK while still following Java standards and conventions. The vast majority of applications can be simply translated from NDI SDK calls to Devolay calls.
 
-Example can be found in [examples/src/main/java/com/walker/devolayexamples](https://github.com/WalkerKnapp/devolay/tree/master/examples/src/main/java/com/walker/devolayexamples).
+Examples can be found in [examples/src/main/java/me/walkerknapp/devolayexamples](https://github.com/WalkerKnapp/devolay/tree/master/examples/src/main/java/me/walkerknapp/devolayexamples).
 
 ## Compiling
 

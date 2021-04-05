@@ -3,9 +3,20 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.nativeplatform.toolchain.internal.tools.ToolSearchPath
 import org.gradle.nativeplatform.toolchain.internal.ToolType
+import org.gradle.nativeplatform.toolchain.internal.gcc.AbstractGccCompatibleToolChain
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+
+// Kotlin has issues if we try to get the working directory from inside a RuleSource, so put it in a static field.
+class BuildContext {
+    companion object {
+        @JvmStatic
+        lateinit var workingDirectory: File
+    }
+}
+
+BuildContext.workingDirectory = file("..")
 
 // For some reason, the compiler plugins (giving NativeToolChainRegistry the compiler factories) don't run
 // until after the build script is evaluated, so we have to set up our toolchains as a part of a @Mutate rule.
@@ -33,22 +44,35 @@ open class ToolchainConfiguration : RuleSource() {
                 }
             }
 
-            // Gradle doesn't check that xcrun exists if there is a macos target specified, so do that check and only
-            // register the target if it exists
-            if (ToolSearchPath(OperatingSystem.current()).locate(ToolType.C_COMPILER, "xcrun").isAvailable) {
-                register<Clang>("osxcross") {
+            val osxcrossBin = locateOsxCross()
+            if (osxcrossBin != null) {
+                register<Clang>("osxcross") { this as AbstractGccCompatibleToolChain
+                    path(osxcrossBin, osxcrossBin.resolve("../binutils/bin"))
+
+                    // Hack into the toolchain internals a bit to set a cached location for our SDK libraries, since
+                    // gradle tries to run xcrun without using the path we set.
+                    val sdkDirs = File(osxcrossBin.parent.resolve("SDK").toString()).listFiles()
+
+                    if (sdkDirs != null && sdkDirs.isNotEmpty()) {
+                        val sLD = AbstractGccCompatibleToolChain::class.java.getDeclaredField("standardLibraryDiscovery")
+                        sLD.isAccessible = true
+                        val pathLocator = org.gradle.nativeplatform.toolchain.internal.gcc.metadata.SystemLibraryDiscovery::class.java.getDeclaredField("macOSSdkPathLocator");
+                        pathLocator.isAccessible = true
+                        val cachedLocation = org.gradle.nativeplatform.toolchain.internal.xcode.AbstractLocator::class.java.getDeclaredField("cachedLocation");
+                        cachedLocation.isAccessible = true
+                        cachedLocation.set(pathLocator.get(sLD.get(this)), sdkDirs[0])
+                    }
+
                     target("macos_x86-64") {
                         this as org.gradle.nativeplatform.toolchain.internal.gcc.DefaultGccPlatformToolChain
                         getcCompiler().executable = "o64-clang"
                         cppCompiler.executable = "o64-clang++"
                         linker.executable = "o64-clang++"
                         assembler.executable = "o64-clang"
-                        symbolExtractor.executable = "x86_64-apple-darwin19-dsymutil"
+                        symbolExtractor.executable = "x86_64-apple-darwin19-objcopy"
                         stripper.executable = "x86_64-apple-darwin19-strip"
                     }
                 }
-            } else {
-                println("Osxcross is not present, these builds will not be compatible with Macos.")
             }
         }
 
@@ -199,9 +223,13 @@ open class ToolchainConfiguration : RuleSource() {
             androidNdk = Paths.get(System.getenv("ANDROID_NDK_ROOT"))
         }
 
+        if (androidNdk == null && System.getenv("ANDROID_NDK_HOME") != null) {
+            androidNdk = Paths.get(System.getenv("ANDROID_NDK_HOME"))
+        }
+
         // Check the working directory
         if (androidNdk == null) {
-            Files.list(Paths.get(".")).forEach {
+            Files.list(BuildContext.workingDirectory.toPath()).forEach {
                 if (it.fileName.startsWith("android-ndk")) {
                     androidNdk = it
                 }
@@ -209,7 +237,7 @@ open class ToolchainConfiguration : RuleSource() {
         }
 
         if (androidNdk == null) {
-            System.err.println("No Android NDK found, android builds will be unavailable. Please set the ANDROID_NDK_ROOT variable to the install location, run gradle with -DandroidNdk=<Install Path>, or symlink the install path to your \"devolay\" folder.")
+            System.err.println("No Android NDK found, android builds will be unavailable. Please set the ANDROID_NDK_ROOT or ANDROID_NDK_HOME variables to the install location, run gradle with -DandroidNdk=<Install Path>, or symlink the install path to your \"devolay\" folder.")
         }
 
         val prebuilts = androidNdk?.resolve("toolchains")?.resolve("llvm")?.resolve("prebuilt")
@@ -222,6 +250,33 @@ open class ToolchainConfiguration : RuleSource() {
         }
 
         return bin
+    }
+
+    private fun locateOsxCross(): Path? {
+        // Check system property
+        var osxcross = if (System.getProperty("osxcrossBin") != null) Paths.get(System.getProperty("osxcrossBin")) else null
+
+        // Check the working directory
+        if (osxcross == null) {
+            Files.list(BuildContext.workingDirectory.toPath()).forEach {
+                if (it.fileName.startsWith("osxcross")) {
+                    osxcross = it.resolve("target").resolve("bin")
+                }
+            }
+        }
+
+        // Check the system path
+        val searchResult = ToolSearchPath(OperatingSystem.current()).locate(ToolType.C_COMPILER, "xcrun")
+        if (osxcross == null && searchResult.isAvailable) {
+            osxcross = searchResult.tool.parentFile.toPath();
+        }
+
+
+        if (osxcross == null) {
+            System.err.println("No Osxcross found, Macos builds will be unavailable. Please add the osxcross/target/bin path to your PATH variable, run gradle with -Dosxcross=<Bin Path>, or symlink the install path to your \"devolay\" folder.")
+        }
+
+        return osxcross
     }
 }
 apply("plugin" to ToolchainConfiguration::class.java)
@@ -236,7 +291,7 @@ plugins {
 val downloadNativeDependencies by tasks.registering(Download::class) {
     src("https://github.com/gulrak/filesystem/releases/download/v1.3.2/filesystem.hpp")
     dest(temporaryDir)
-    overwrite(false)
+    overwrite(true)
 
     outputs.file(temporaryDir.resolve("filesystem.hpp"))
     outputs.dir(temporaryDir)
@@ -342,7 +397,8 @@ val assembleNativeArtifacts by tasks.registering(Jar::class) {
                 val machine = this.targetMachine
 
                 // Only include release binaries
-                if (this.isOptimized) {
+                if (this.isOptimized && !this.getName().toLowerCase().contains("debug")) {
+                    print(this.getName())
                     dependsOn(this.outputs)
                     from(this.outputs) {
                         into("natives/" + machine.operatingSystemFamily.name + "/" + machine.architecture.name)

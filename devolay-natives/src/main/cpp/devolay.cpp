@@ -51,17 +51,19 @@ JNIEXPORT jint JNICALL Java_me_walkerknapp_devolay_Devolay_nLoadLibraries(JNIEnv
 
             // Load NDI library
 #ifdef _WIN32
-            LPCSTR libNameC = possibleLibPath.string().c_str();
-            HMODULE hNDILib = LoadLibraryA(libNameC);
+            std::string libPathString = possibleLibPath.string();
+            std::wstring libPathWString = std::wstring(libPathString.begin(), libPathString.end());
+            LPCWSTR libNameC = libPathWString.c_str();
+            HMODULE hNDILib = LoadLibraryW(libNameC);
 
             if(hNDILib) {
-                const NDIlib_v3* (*NDIlib_v3_load)(void) = NULL;
+                const NDIlib_v3* (*NDIlib_v3_load)() = nullptr;
                 *((FARPROC*)&NDIlib_v3_load) = GetProcAddress(hNDILib, "NDIlib_v3_load");
 
                 if (NDIlib_v3_load != nullptr) {
                     ndiLib = NDIlib_v3_load();
 
-                    ndiLib->NDIlib_initialize();
+                    ndiLib->initialize();
                     return 0;
                 } else {
                     FreeLibrary(hNDILib);
@@ -70,7 +72,7 @@ JNIEXPORT jint JNICALL Java_me_walkerknapp_devolay_Devolay_nLoadLibraries(JNIEnv
                     return -2;
                 }
             } else {
-                printf("Library failed to load.");
+                printf("Library failed to load: %lu\n", GetLastError());
             }
 #else
             void *hNDILib = dlopen(possibleLibPath.c_str(), RTLD_LOCAL | RTLD_LAZY);

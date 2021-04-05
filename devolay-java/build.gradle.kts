@@ -1,13 +1,10 @@
-import com.jfrog.bintray.gradle.BintrayExtension
 import org.gradle.internal.jvm.Jvm
-import java.io.FileReader
-import java.util.*
 
 plugins {
     base
     `java-library`
     `maven-publish`
-    id("com.jfrog.bintray") version "1.8.4"
+    signing
 }
 
 base.archivesBaseName = "devolay"
@@ -24,40 +21,19 @@ val javadocJar by tasks.creating(Jar::class) {
     this.archiveClassifier.set("javadoc")
 }
 
-// Load keys.properties and configure bintray for deploy
-val keysProperties = Properties()
-if(project.file("keys.properties").exists()) {
-    FileReader(project.file("keys.properties")).use { reader ->
-        keysProperties.load(reader)
-    }
-}
-
-println(keysProperties.getProperty("bintray_user"))
-
-bintray {
-    user = keysProperties.getProperty("bintray_user")
-    key = keysProperties.getProperty("bintray_api_key")
-
-    setPublications("Devolay")
-
-    pkg (delegateClosureOf<BintrayExtension.PackageConfig> {
-        repo = "devolay"
-        name = "devolay"
-        vcsUrl = "https://github.com/WalkerKnapp/devolay.git"
-        setLicenses("Apache-2.0")
-
-        version (delegateClosureOf<BintrayExtension.VersionConfig> {
-            name = project.version as String?
-            desc = "Devolay Library " + project.version + " Release"
-            released = Date().toString()
-            vcsTag = "v" + project.version
-        })
-    })
-}
-
 publishing {
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = System.getenv("OSSRH_USERNAME")
+                password = System.getenv("OSSRH_PASSWORD")
+            }
+        }
+    }
     publications {
-        create<MavenPublication>("Devolay") {
+        create<MavenPublication>("devolay") {
             from(components["java"])
             artifact(sourceJar)
             artifact(javadocJar)
@@ -67,8 +43,8 @@ publishing {
             version = project.version as String?
 
             pom {
-                name.set("devolay")
-                description.set("A Java binding for the Newtek NDI(tm) SDK.")
+                name.set("Devolay")
+                description.set("Devolay is a library for sending and receiving video over the network using the Newtek NDI(tm) SDK.")
                 url.set("https://github.com/WalkerKnapp/devolay")
 
                 licenses {
@@ -82,6 +58,7 @@ publishing {
                     developer {
                         id.set("WalkerKnapp")
                         name.set("Walker Knapp")
+                        email.set("walker@walkerknapp.me")
                     }
                 }
 
@@ -93,6 +70,11 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    useInMemoryPgpKeys(System.getenv("PGP_KEY_ID"), System.getenv("PGP_KEY"), System.getenv("PGP_PASSWORD"))
+    sign(publishing.publications["devolay"])
 }
 
 // Generate an artifact of the JNI headers created by this project, for devolay-natives to consume.

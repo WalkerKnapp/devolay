@@ -310,7 +310,7 @@ tasks.withType(CppCompile::class).configureEach {
 tasks.withType(LinkSharedLibrary::class).configureEach {
     linkerArgs.addAll(toolChain.map { toolChain ->
         when (toolChain) {
-            is GccCompatibleToolChain -> listOf("-shared", "-static-libgcc", "-static-libstdc++")
+            is Gcc -> listOf("-shared", "-static-libgcc", "-static-libstdc++")
             else -> listOf()
         }
     })

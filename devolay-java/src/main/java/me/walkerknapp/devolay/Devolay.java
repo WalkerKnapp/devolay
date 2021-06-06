@@ -47,10 +47,25 @@ public class Devolay {
             Files.copy(is, tempPath, StandardCopyOption.REPLACE_EXISTING);
             System.load(tempPath.toAbsolutePath().toString());
 
-            // Delete the natives when exiting
+            // Create a lock file for this dll
+            Path tempLock = tempPath.resolveSibling(tempPath.getFileName().toString() + ".lock");
+            Files.createFile(tempLock);
+
+            // Delete any natives when exiting that do not have a corresponding lock file, and delete our own lock file
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
-                    Files.delete(tempPath);
+                    Files.list(tempPath.getParent())
+                            .filter(path -> path.getFileName().startsWith("devolay-natives"))
+                            .filter(path -> !Files.exists(path.resolveSibling(path.getFileName().toString() + ".lock")))
+                            .forEach(path -> {
+                                try {
+                                    Files.delete(path);
+                                } catch (IOException e) {
+                                    // ignored, the file is in use without a lock
+                                }
+                            });
+
+                    Files.delete(tempLock);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

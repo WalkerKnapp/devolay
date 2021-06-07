@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'me.walkerknapp:devolay:2.0.0'
+    implementation 'me.walkerknapp:devolay:2.0.1'
 }
 ```
 
@@ -23,7 +23,7 @@ dependencies {
 <dependency>
   <groupId>me.walkerknapp</groupId>
   <artifactId>devolay</artifactId>
-  <version>2.0.0</version>
+  <version>2.0.1</version>
 </dependency>
 ```
 

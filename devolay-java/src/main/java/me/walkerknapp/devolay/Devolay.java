@@ -50,21 +50,23 @@ public class Devolay {
             // Create a lock file for this dll
             Path tempLock = tempPath.resolveSibling(tempPath.getFileName().toString() + ".lock");
             Files.createFile(tempLock);
+            tempLock.toFile().deleteOnExit();
 
-            // Delete any natives when exiting that do not have a corresponding lock file, and delete our own lock file
+            // Clean up any natives from previous runs that do not have a corresponding lock file
+            Files.list(tempPath.getParent())
+                    .filter(path -> path.getFileName().toString().startsWith("devolay-natives") && path.getFileName().toString().endsWith(".dll"))
+                    .filter(path -> !Files.exists(path.resolveSibling(path.getFileName().toString() + ".lock")))
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            // ignored, the file is in use without a lock
+                        }
+                    });
+
+            // Delete our own lock file
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
-                    Files.list(tempPath.getParent())
-                            .filter(path -> path.getFileName().startsWith("devolay-natives"))
-                            .filter(path -> !Files.exists(path.resolveSibling(path.getFileName().toString() + ".lock")))
-                            .forEach(path -> {
-                                try {
-                                    Files.delete(path);
-                                } catch (IOException e) {
-                                    // ignored, the file is in use without a lock
-                                }
-                            });
-
                     Files.delete(tempLock);
                 } catch (IOException e) {
                     e.printStackTrace();

@@ -16,8 +16,11 @@ public class Devolay {
         final String libraryExtension = libraryName.substring(libraryName.indexOf('.'));
 
         final String osNameProperty = System.getProperty("os.name").toLowerCase();
+        final String javaRuntimeProperty = System.getProperty("java.runtime.name");
         String osDirectory;
-        if (osNameProperty.contains("nix") || osNameProperty.contains("nux")) {
+        if (javaRuntimeProperty != null && javaRuntimeProperty.toLowerCase().contains("android")) {
+            osDirectory = "android";
+        } else if (osNameProperty.contains("nix") || osNameProperty.contains("nux")) {
             osDirectory = "linux";
         } else if (osNameProperty.contains("win")) {
             osDirectory = "windows";

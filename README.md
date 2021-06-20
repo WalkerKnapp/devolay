@@ -1,5 +1,5 @@
 # Devolay
-A Java library for sending and receiving video over the network using the Newtek NDI(tm) SDK. For more information about NDI(tm), see:
+A Java library for sending and receiving video over the network using the Newtek NDI® SDK. For more information about NDI®, see:
 
 http://NDI.NewTek.com/
 
@@ -31,6 +31,20 @@ dependencies {
 Devolay aims to be close to the original NDI SDK while still following Java standards and conventions. The vast majority of applications can be simply translated from NDI SDK calls to Devolay calls.
 
 Examples can be found in [examples/src/main/java/me/walkerknapp/devolayexamples](https://github.com/WalkerKnapp/devolay/tree/master/examples/src/main/java/me/walkerknapp/devolayexamples).
+
+
+## Licensing Considerations
+
+`Separated` Builds do not contain any assets restricted under the NDI SDK License Agreement.
+However, `Integrated` Builds contain binary files from each platform's NDI SDK.
+Therefore, any products distributed to end users that use `Integrated` Builds **must** follow the guidelines in section 5.2 of the NDI SDK Documentation.
+
+For full details, please install the NDI SDK and read the NDI SDK Documentation and NDI SDK License Agreement.
+To summarize to the best of my knowledge (not legal advice, please get legal consultation any serious application),
+applications must:
+- Provide a link to [http://ndi.tv/](http://ndi.tv/) where NDI is used in the application, on its website, and in its documentation.
+- Refer to NDI, the product, with "NDI®", and contain the phrase "NDI® is a registered trademark of NewTek, Inc." on the same page where it is used (this only applies to the first use of "NDI" in a document).
+- Include the phrase "NDI® is a registered trademark of NewTek, Inc." in any About Box and other locations where trademark attribution is provided.
 
 ## Compiling
 

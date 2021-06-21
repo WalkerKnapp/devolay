@@ -4,16 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Devolay {
 
     private static final AtomicBoolean librariesLoaded = new AtomicBoolean(false);
-    private static final AtomicReference<String> loadedNdiLibraryName = new AtomicReference<>();
+    private static final AtomicReference<String> extractedNdiLibraryPath = new AtomicReference<>();
 
     static {
         String devolayLibraryName = System.mapLibraryName("devolay-natives");
@@ -41,41 +39,11 @@ public class Devolay {
             throw new IllegalStateException("This build of Devolay is not compiled for your OS. Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.");
         }
 
-        System.load(devolayNativesPath.toAbsolutePath().toString());
-
-        // Load the NDI native library from some standard locations
-        ArrayList<Path> possibleNdiLocations = new ArrayList<>();
-
         if (ndiLibraryPath != null) {
-            possibleNdiLocations.add(ndiLibraryPath);
+            extractedNdiLibraryPath.set(ndiLibraryPath.toAbsolutePath().toString());
         }
 
-        String redistFolder = System.getenv("NDI_RUNTIME_DIR_V4");
-        if (redistFolder != null) {
-            possibleNdiLocations.add(Paths.get(redistFolder).resolve(getStandardNdiLibraryName(osDirectory, archDirectory)));
-        }
-
-        if (osDirectory.equals("linux")) {
-            possibleNdiLocations.add(Paths.get("/usr/lib/libndi.so.4"));
-            possibleNdiLocations.add(Paths.get("/usr/local/lib/libndi.so.4"));
-        } else if (osDirectory.equals("macos")) {
-            possibleNdiLocations.add(Paths.get("/Library/NDI SDK for Apple/lib/x64/libndi.4.dylib"));
-        }
-
-        boolean loadedNdi = false;
-        for (Path possibleLibPath : possibleNdiLocations) {
-            if (Files.exists(possibleLibPath) && Files.isRegularFile(possibleLibPath)) {
-                System.load(possibleLibPath.toAbsolutePath().toString());
-                loadedNdiLibraryName.set(possibleLibPath.getFileName().toString());
-                loadedNdi = true;
-                break;
-            }
-        }
-
-        if (!loadedNdi) {
-            throw new IllegalStateException("The NDI(tm) SDK libraries were not found.");
-        }
-
+        System.load(devolayNativesPath.toAbsolutePath().toString());
 
         int ret = loadLibraries();
         if(ret != 0) {
@@ -86,23 +54,6 @@ public class Devolay {
                 throw new IllegalStateException("The NDI(tm) SDK libraries failed to load. Please reinstall.");
             }
         }
-    }
-
-    private static String getStandardNdiLibraryName(String osDirectory, String archDirectory) {
-        switch (osDirectory) {
-            case "android":
-            case "linux":
-                return "libndi.so.4";
-            case "macos":
-                return "libndi.4.dylib";
-            case "windows":
-                if (archDirectory.equals("x86-64")) {
-                    return "Processing.NDI.Lib.x64.dll";
-                } else {
-                    return "Processing.NDI.Lib.x86.dll";
-                }
-        }
-        throw new IllegalArgumentException("Unknown OS Directory: " + osDirectory);
     }
 
     private static String getOsDirectory() {
@@ -177,7 +128,7 @@ public class Devolay {
      */
     public static int loadLibraries() {
         if(!librariesLoaded.get()) {
-            int ret = nLoadLibraries(loadedNdiLibraryName.get());
+            int ret = nLoadLibraries(extractedNdiLibraryPath.get());
             if(ret == 0) {
                 librariesLoaded.set(true);
             }
@@ -207,7 +158,7 @@ public class Devolay {
 
     // Native Methods
 
-    private static native int nLoadLibraries(String loadedNdiName);
+    private static native int nLoadLibraries(String extractedNdiPath);
     private static native String nGetVersion();
     private static native boolean nIsSupportedCpu();
 }

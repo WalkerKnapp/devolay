@@ -23,12 +23,18 @@ const NDIlib_v3 *getNDILib() {
     return ndiLib;
 }
 
-JNIEXPORT jint JNICALL Java_me_walkerknapp_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz) {
+JNIEXPORT jint JNICALL Java_me_walkerknapp_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz, jstring extractedNdiLibrary) {
     std::vector<std::string> locations;
 
     char *redistFolder = getenv(NDILIB_REDIST_FOLDER);
     if(redistFolder != nullptr) {
         locations.emplace_back(std::string(redistFolder));
+    }
+
+    if (extractedNdiLibrary != nullptr) {
+        const char *extractedNdiLibraryCstr = env->GetStringUTFChars(extractedNdiLibrary, 0);
+        locations.emplace_back(std::string(extractedNdiLibraryCstr));
+        env->ReleaseStringUTFChars(extractedNdiLibrary, extractedNdiLibraryCstr);
     }
 
 #if defined(__linux__) || defined(__APPLE__)

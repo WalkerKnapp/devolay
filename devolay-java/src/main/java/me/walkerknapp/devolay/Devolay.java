@@ -6,79 +6,35 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Devolay {
 
     private static final AtomicBoolean librariesLoaded = new AtomicBoolean(false);
+    private static final AtomicReference<String> extractedNdiLibraryPath = new AtomicReference<>();
 
     static {
-        final String libraryName = System.mapLibraryName("devolay-natives");
-        final String libraryExtension = libraryName.substring(libraryName.indexOf('.'));
+        final String devolayLibraryName = System.mapLibraryName("devolay-natives");
+        final String ndiLibraryName = System.mapLibraryName("ndi");
+        final String libraryExtension = devolayLibraryName.substring(devolayLibraryName.indexOf('.'));
 
-        final String osNameProperty = System.getProperty("os.name").toLowerCase();
-        final String javaRuntimeProperty = System.getProperty("java.runtime.name");
-        String osDirectory;
-        if (javaRuntimeProperty != null && javaRuntimeProperty.toLowerCase().contains("android")) {
-            osDirectory = "android";
-        } else if (osNameProperty.contains("nix") || osNameProperty.contains("nux")) {
-            osDirectory = "linux";
-        } else if (osNameProperty.contains("win")) {
-            osDirectory = "windows";
-        } else if (osNameProperty.contains("mac")) {
-            osDirectory = "macos";
-        } else {
-            throw new IllegalStateException("Unsupported OS: " + osNameProperty + ". Please open an issue at https://github.com/WalkerKnapp/devolay/issues");
+        String osDirectory = getOsDirectory();
+        String archDirectory = getArchDirectory();
+
+        Path devolayNativesPath = extractNative("devolay-natives", libraryExtension,
+                "/natives/" + osDirectory + "/" + archDirectory + "/" + devolayLibraryName);
+        Path ndiLibraryPath = extractNative("ndi", libraryExtension,
+                "/natives/" + osDirectory + "/" + archDirectory + "/" + ndiLibraryName);
+
+        if (devolayNativesPath == null) {
+            throw new IllegalStateException("This build of Devolay is not compiled for your OS. Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.");
         }
 
-        final String osArchProperty = System.getProperty("os.arch").toLowerCase();
-        String archDirectory;
-        if (osArchProperty.contains("64")) {
-            archDirectory = "x86-64";
-        } else if (osArchProperty.contains("86")) {
-            archDirectory = "x86";
-        } else {
-            throw new IllegalStateException("Unsupported Arch: " + osArchProperty + ". Please open an issue at https://github.com/WalkerKnapp/devolay/issues");
+        if (ndiLibraryPath != null) {
+            extractedNdiLibraryPath.set(ndiLibraryPath.toAbsolutePath().toString());
         }
 
-        try(InputStream is = Devolay.class.getResourceAsStream("/natives/" + osDirectory + "/" + archDirectory + "/" + libraryName)) {
-            if(is == null) {
-                throw new IllegalStateException("This build of Devolay is not compiled for your OS. Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.");
-            }
-
-            // Copy the natives to a temp file to be loaded
-            Path tempPath = Files.createTempFile("devolay-natives", libraryExtension);
-            Files.copy(is, tempPath, StandardCopyOption.REPLACE_EXISTING);
-            System.load(tempPath.toAbsolutePath().toString());
-
-            // Create a lock file for this dll
-            Path tempLock = tempPath.resolveSibling(tempPath.getFileName().toString() + ".lock");
-            Files.createFile(tempLock);
-            tempLock.toFile().deleteOnExit();
-
-            // Clean up any natives from previous runs that do not have a corresponding lock file
-            Files.list(tempPath.getParent())
-                    .filter(path -> path.getFileName().toString().startsWith("devolay-natives") && path.getFileName().toString().endsWith(".dll"))
-                    .filter(path -> !Files.exists(path.resolveSibling(path.getFileName().toString() + ".lock")))
-                    .forEach(path -> {
-                        try {
-                            Files.delete(path);
-                        } catch (IOException e) {
-                            // ignored, the file is in use without a lock
-                        }
-                    });
-
-            // Delete our own lock file
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    Files.delete(tempLock);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-
+        System.load(devolayNativesPath.toAbsolutePath().toString());
 
         int ret = loadLibraries();
         if(ret != 0) {
@@ -88,6 +44,68 @@ public class Devolay {
             } else if(ret == -2) {
                 throw new IllegalStateException("The NDI(tm) SDK libraries failed to load. Please reinstall.");
             }
+        }
+    }
+
+    private static String getOsDirectory() {
+        final String osNameProperty = System.getProperty("os.name").toLowerCase();
+        final String javaRuntimeProperty = System.getProperty("java.runtime.name");
+        if (javaRuntimeProperty != null && javaRuntimeProperty.toLowerCase().contains("android")) {
+            return "android";
+        } else if (osNameProperty.contains("nix") || osNameProperty.contains("nux")) {
+            return "linux";
+        } else if (osNameProperty.contains("win")) {
+            return "windows";
+        } else if (osNameProperty.contains("mac")) {
+            return "macos";
+        } else {
+            throw new IllegalStateException("Unsupported OS: " + osNameProperty + ". Please open an issue at https://github.com/WalkerKnapp/devolay/issues");
+        }
+    }
+
+    private static String getArchDirectory() {
+        final String osArchProperty = System.getProperty("os.arch").toLowerCase();
+        if (osArchProperty.contains("64")) {
+            return "x86-64";
+        } else if (osArchProperty.contains("86")) {
+            return "x86";
+        } else {
+            throw new IllegalStateException("Unsupported Arch: " + osArchProperty + ". Please open an issue at https://github.com/WalkerKnapp/devolay/issues");
+        }
+    }
+
+    private static Path extractNative(String prefix, String suffix, String pathInJar) {
+        try(InputStream is = Devolay.class.getResourceAsStream(pathInJar)) {
+            if(is == null) {
+               return null;
+            }
+
+            // Get a temporary directory to place natives
+            Path tempPath = Files.createTempFile(prefix, suffix);
+
+            // Create a lock file for this dll
+            Path tempLock = tempPath.resolveSibling(tempPath.getFileName().toString() + ".lock");
+            Files.createFile(tempLock);
+            tempLock.toFile().deleteOnExit();
+
+            // Copy the natives to be loaded
+            Files.copy(is, tempPath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Clean up any natives from previous runs that do not have a corresponding lock file
+            Files.list(tempPath.getParent())
+                    .filter(path -> path.getFileName().toString().startsWith(prefix) && path.getFileName().toString().endsWith(suffix))
+                    .filter(path -> !Files.exists(path.resolveSibling(path.getFileName().toString() + ".lock")))
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            // ignored, the file is in use without a lock
+                        }
+                    });
+
+            return tempPath;
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -101,7 +119,7 @@ public class Devolay {
      */
     public static int loadLibraries() {
         if(!librariesLoaded.get()) {
-            int ret = nLoadLibraries();
+            int ret = nLoadLibraries(extractedNdiLibraryPath.get());
             if(ret == 0) {
                 librariesLoaded.set(true);
             }
@@ -131,7 +149,7 @@ public class Devolay {
 
     // Native Methods
 
-    private static native int nLoadLibraries();
+    private static native int nLoadLibraries(String extractedNdiPath);
     private static native String nGetVersion();
     private static native boolean nIsSupportedCpu();
 }

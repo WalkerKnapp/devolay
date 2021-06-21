@@ -37,7 +37,7 @@ tasks.withType(CppCompile::class).configureEach {
 tasks.withType(LinkSharedLibrary::class).configureEach {
     linkerArgs.addAll(toolChain.map { toolChain ->
         when (toolChain) {
-            is Gcc -> listOf("-shared", "-static-libgcc", "-static-libstdc++")
+            is GccCompatibleToolChain -> listOf("-shared", "-static-libgcc", "-static-libstdc++")
             else -> listOf()
         }
     })
@@ -138,6 +138,10 @@ val assembleNativeArtifacts by tasks.registering(Jar::class) {
                         into("natives/" + machine.operatingSystemFamily.name + "/" + machine.architecture.name)
                         exclude("*.lib")
                         exclude("*.debug")
+
+                        if (machine.operatingSystemFamily.name == "android") {
+                            rename { it.subSequence(0, it.lastIndexOf('.')).toString() + ".androidnative" }
+                        }
                     }
                 }
             }
@@ -159,7 +163,7 @@ val assembleIntegratedNDIArtifacts by tasks.registering(Jar::class) {
                 var nativeLibName: String? = null;
 
                 if (machine.operatingSystemFamily.name == "android") {
-                    nativeLibName = "libndi.so"
+                    nativeLibName = "libndi.androidnative"
                     nativeLicensePaths.add(file("../NDI SDK for Android/licenses/Bonjour.txt").toPath())
                     nativeLicensePaths.add(file("../NDI SDK for Android/licenses/libndi_licenses.txt").toPath())
                     when (machine.architecture.name) {
@@ -188,7 +192,7 @@ val assembleIntegratedNDIArtifacts by tasks.registering(Jar::class) {
                             nativeLicensePaths.add(file("../NDI SDK for Windows/Bin/x64/Processing.NDI.Lib.Licenses.txt").toPath())
                         }
                     }
-                } else if (machine.operatingSystemFamily.name == "macOS") {
+                } else if (machine.operatingSystemFamily.name == "macos") {
                     nativeLibName = "libndi.dylib"
                     nativeLicensePaths.add(file("../NDI SDK for Apple/licenses/libndi_licenses.txt").toPath())
                     when (machine.architecture.name) {

@@ -14,12 +14,21 @@ public class Devolay {
     private static final AtomicReference<String> extractedNdiLibraryPath = new AtomicReference<>();
 
     static {
-        final String devolayLibraryName = System.mapLibraryName("devolay-natives");
-        final String ndiLibraryName = System.mapLibraryName("ndi");
-        final String libraryExtension = devolayLibraryName.substring(devolayLibraryName.indexOf('.'));
+        String devolayLibraryName = System.mapLibraryName("devolay-natives");
+        String ndiLibraryName = System.mapLibraryName("ndi");
+        String libraryExtension = devolayLibraryName.substring(devolayLibraryName.indexOf('.'));
 
         String osDirectory = getOsDirectory();
         String archDirectory = getArchDirectory();
+
+        // This is a nasty hack to get android to load *.so files from a jar.
+        // Normally, these would be expected to be bundled in an *.arr, but it is difficult to construct
+        // one without the com.android.library plugin, which is incompatible with the java-library plugin.
+        // If anyone has a better solution for this, I would be very open to suggestions.
+        if (osDirectory.equals("android")) {
+            devolayLibraryName = "libdevolay-natives.androidnative";
+            ndiLibraryName = "libndi.androidnative";
+        }
 
         Path devolayNativesPath = extractNative("devolay-natives", libraryExtension,
                 "/natives/" + osDirectory + "/" + archDirectory + "/" + devolayLibraryName);

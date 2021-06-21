@@ -10,6 +10,21 @@ plugins {
 base.archivesBaseName = "devolay"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
+sourceSets {
+    create("integrated") {
+        java {
+            srcDir("src/main/java")
+        }
+    }
+}
+
+java {
+    registerFeature("integrated") {
+        usingSourceSet(sourceSets["main"])
+        usingSourceSet(sourceSets["integrated"])
+    }
+}
+
 val sourceJar by tasks.creating(Jar::class) {
     from(sourceSets.main.get().allJava)
     this.archiveClassifier.set("sources")
@@ -131,11 +146,23 @@ val nativeDependency: Configuration by configurations.creating {
     extendsFrom(configurations["implementation"], configurations["runtimeOnly"])
 }
 
+val ndiDependency: Configuration by configurations.creating {
+    extendsFrom(configurations["integratedImplementation"], configurations["integratedRuntimeElements"])
+}
+
 dependencies {
     nativeDependency(project(":devolay-natives", "nativeArtifacts"))
+    ndiDependency(project(":devolay-natives", "integratedNdiArtifacts"))
 }
 
 tasks.jar {
     dependsOn(nativeDependency)
+    from(nativeDependency.map { zipTree(it) })
+}
+
+tasks.named<Jar>("integratedJar") {
+    dependsOn(ndiDependency)
+    dependsOn(nativeDependency)
+    from(ndiDependency.map { zipTree(it) })
     from(nativeDependency.map { zipTree(it) })
 }

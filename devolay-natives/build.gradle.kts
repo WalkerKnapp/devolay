@@ -18,9 +18,26 @@ apply {
 val downloadNativeDependencies by tasks.registering(Download::class) {
     src("https://github.com/gulrak/filesystem/releases/download/v1.3.2/filesystem.hpp")
     dest(temporaryDir)
-    overwrite(true)
 
     outputs.file(temporaryDir.resolve("filesystem.hpp"))
+    outputs.dir(temporaryDir)
+}
+
+val downloadJniHeader by tasks.registering(Download::class) {
+    src("https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/native/include/jni.h")
+    dest(temporaryDir)
+    outputs.dir(temporaryDir)
+}
+
+val downloadJniMdHeaderUnix by tasks.registering(Download::class) {
+    src("https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/unix/native/include/jni_md.h")
+    dest(temporaryDir)
+    outputs.dir(temporaryDir)
+}
+
+val downloadJniMdHeaderWindows by tasks.registering(Download::class) {
+    src("https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/windows/native/include/jni_md.h")
+    dest(temporaryDir)
     outputs.dir(temporaryDir)
 }
 
@@ -28,7 +45,7 @@ tasks.withType(CppCompile::class).configureEach {
     compilerArgs.addAll(toolChain.map { toolChain ->
         when (toolChain) {
             is VisualCpp -> listOf("/std:c++11")
-            is GccCompatibleToolChain -> listOf("-lstdc++", "-std=c++11", "-static-libgcc", "-static-libstdc++")
+            is GccCompatibleToolChain -> listOf("-lstdc++", "-std=c++11", "-static-libgcc", "-static-libstdc++", "-ldl", "-llog")
             else -> listOf()
         }
     })
@@ -37,7 +54,7 @@ tasks.withType(CppCompile::class).configureEach {
 tasks.withType(LinkSharedLibrary::class).configureEach {
     linkerArgs.addAll(toolChain.map { toolChain ->
         when (toolChain) {
-            is GccCompatibleToolChain -> listOf("-shared", "-static-libgcc", "-static-libstdc++")
+            is GccCompatibleToolChain -> listOf("-shared", "-static-libgcc", "-static-libstdc++", "-ldl", "-llog")
             else -> listOf()
         }
     })
@@ -62,18 +79,24 @@ library {
     privateHeaders {
         from(headerOnly)
 
-        // Include JNI Path
-        file(Jvm.current().javaHome.toPath().resolve("include")).walk().forEach {
-            if (it.isDirectory) {
-                from(it)
-            }
-        }
+        // Include platform-independent JNI Path
+        from(downloadJniHeader)
 
         // Include our downloaded headers
         from(downloadNativeDependencies)
 
         // Include NDI headers
         from(files(locateNdiIncludes()))
+    }
+
+    binaries.whenElementFinalized {
+        if (this.targetMachine.operatingSystemFamily.isWindows) {
+            this.compileTask.get().dependsOn(downloadJniMdHeaderWindows)
+            this.compileTask.get().includes.from(downloadJniMdHeaderWindows)
+        } else {
+            this.compileTask.get().dependsOn(downloadJniMdHeaderUnix)
+            this.compileTask.get().includes.from(downloadJniMdHeaderUnix)
+        }
     }
 }
 

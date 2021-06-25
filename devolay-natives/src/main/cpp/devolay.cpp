@@ -5,10 +5,15 @@
 #include <vector>
 
 #ifdef _WIN32
-#include <windows.h>
+#include <Windows.h>
 #else
 #include <stdlib.h>
 #include <dlfcn.h>
+#endif
+
+#ifdef __ANDROID__
+#include <android/log.h>
+#define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "TAG", __VA_ARGS__);
 #endif
 
 #define GHC_WITH_EXCEPTIONS
@@ -23,37 +28,35 @@ const NDIlib_v3 *getNDILib() {
     return ndiLib;
 }
 
-JNIEXPORT jint JNICALL Java_me_walkerknapp_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz, jstring extractedNdiLibrary) {
-    std::vector<std::string> locations;
+JNIEXPORT jint JNICALL Java_me_walkerknapp_devolay_Devolay_nLoadLibraries(JNIEnv * env, jclass jClazz, jstring jNdiLibraryPath) {
+    std::vector<fs::path> locations;
 
     char *redistFolder = getenv(NDILIB_REDIST_FOLDER);
     if(redistFolder != nullptr) {
-        locations.emplace_back(std::string(redistFolder));
+        locations.emplace_back(fs::path(std::string(redistFolder) + "/" + NDILIB_LIBRARY_NAME));
     }
 
-    if (extractedNdiLibrary != nullptr) {
-        const char *extractedNdiLibraryCstr = env->GetStringUTFChars(extractedNdiLibrary, 0);
-        locations.emplace_back(std::string(extractedNdiLibraryCstr));
-        env->ReleaseStringUTFChars(extractedNdiLibrary, extractedNdiLibraryCstr);
+    if (jNdiLibraryPath != nullptr) {
+        const char* ndiLibraryCstr = env->GetStringUTFChars(jNdiLibraryPath, nullptr);
+        locations.emplace_back(fs::path(std::string(ndiLibraryCstr)));
+        env->ReleaseStringUTFChars(jNdiLibraryPath, ndiLibraryCstr);
     }
 
 #if defined(__linux__) || defined(__APPLE__)
-    locations.emplace_back("/usr/lib");
-    locations.emplace_back("/usr/local/lib");
+    locations.emplace_back(fs::path(std::string("/usr/lib/") + NDILIB_LIBRARY_NAME));
+    locations.emplace_back(fs::path(std::string("/usr/local/lib/") + NDILIB_LIBRARY_NAME));
 #endif
 #if defined(__APPLE__)
-    locations.emplace_back("/Library/NDI SDK for Apple/lib/x64");
+    locations.emplace_back(fs::path(std::string("/Library/NDI SDK for Apple/lib/x64/") + NDILIB_LIBRARY_NAME));
 #endif
 
-    for(const std::string& possiblePath : locations) {
-        fs::path possibleLibPath(possiblePath);
-        possibleLibPath += "/";
-        possibleLibPath += NDILIB_LIBRARY_NAME;
 
-        //printf("Testing for NDI at %s\n", possibleLibPath.string().c_str());
+    for(const fs::path& possibleLibPath : locations) {
+
+        printf("Testing for NDI at %s\n", possibleLibPath.string().c_str());
 
         if(fs::exists(possibleLibPath) && fs::is_regular_file(possibleLibPath)) {
-            //printf("Found NDI library at '%s'\n", possibleLibPath.c_str());
+            printf("Found NDI library at '%s'\n", possibleLibPath.c_str());
 
             // Load NDI library
 #ifdef _WIN32

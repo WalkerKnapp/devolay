@@ -1,27 +1,52 @@
 #include "devolay.h"
 
+#include <cstring>
+
 #include "../headers/me_walkerknapp_devolay_DevolaySender.h"
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "TAG", __VA_ARGS__);
+#endif
+
 JNIEXPORT jlong JNICALL Java_me_walkerknapp_devolay_DevolaySender_sendCreate(JNIEnv *env, jclass jClazz, jstring jNdiName, jstring jGroups, jboolean jClockVideo, jboolean jClockAudio) {
+    printf("1\n");
     auto *NDI_send_create_desc = new NDIlib_send_create_t();
 
-    auto *isCopy = new jboolean();
-    *isCopy = JNI_TRUE;
+    printf("2\n");
     if(jNdiName != nullptr) {
-        const char *name = env->GetStringUTFChars(jNdiName, isCopy);
-        NDI_send_create_desc->p_ndi_name = name;
+        printf("2a\n");
+        const char *ndiName = env->GetStringUTFChars(jNdiName, nullptr);
+        printf("2b\n");
+        NDI_send_create_desc->p_ndi_name = strdup(ndiName);
+        printf("2c\n");
+        env->ReleaseStringUTFChars(jNdiName, ndiName);
     }
+    printf("3\n");
     if(jGroups != nullptr) {
-        const char *groups = env->GetStringUTFChars(jGroups, isCopy);
-        NDI_send_create_desc->p_groups = groups;
+        printf("3a\n");
+        const char *groups = env->GetStringUTFChars(jGroups, nullptr);
+        printf("3b\n");
+        NDI_send_create_desc->p_groups = strdup(groups);
+        printf("3c\n");
+        env->ReleaseStringUTFChars(jGroups, groups);
     }
-    delete isCopy;
+
+    printf("4\n");
 
     NDI_send_create_desc->clock_video = jClockVideo;
     NDI_send_create_desc->clock_audio = jClockAudio;
 
+    printf("5\n");
+
     auto ret = getNDILib()->send_create(NDI_send_create_desc);
+
+    printf("6\n");
+
+    delete NDI_send_create_desc->p_ndi_name;
+    delete NDI_send_create_desc->p_groups;
     delete NDI_send_create_desc;
+
     return (jlong) ret;
 }
 

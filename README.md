@@ -33,7 +33,7 @@ Devolay aims to be close to the original NDI SDK while still following Java stan
 Examples can be found in [examples/src/main/java/me/walkerknapp/devolayexamples](https://github.com/WalkerKnapp/devolay/tree/master/examples/src/main/java/me/walkerknapp/devolayexamples).
 
 
-## Licensing Considerations
+## ⚠️Licensing Considerations⚠️
 
 `Separated` Builds do not contain any assets restricted under the NDI SDK License Agreement.
 However, `Integrated` Builds contain binary files from each platform's NDI SDK.

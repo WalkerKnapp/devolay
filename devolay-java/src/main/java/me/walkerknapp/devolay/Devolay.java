@@ -2,6 +2,8 @@ package me.walkerknapp.devolay;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -11,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Devolay {
 
     private static final AtomicBoolean librariesLoaded = new AtomicBoolean(false);
-    private static final AtomicReference<String> extractedNdiLibraryPath = new AtomicReference<>();
+    private static String extractedNdiLibraryPath = null;
 
     static {
         String devolayLibraryName = System.mapLibraryName("devolay-natives");
@@ -40,7 +42,7 @@ public class Devolay {
         }
 
         if (ndiLibraryPath != null) {
-            extractedNdiLibraryPath.set(ndiLibraryPath.toAbsolutePath().toString());
+            extractedNdiLibraryPath = ndiLibraryPath.toAbsolutePath().toString();
         }
 
         System.load(devolayNativesPath.toAbsolutePath().toString());
@@ -74,7 +76,11 @@ public class Devolay {
 
     private static String getArchDirectory() {
         final String osArchProperty = System.getProperty("os.arch").toLowerCase();
-        if (osArchProperty.contains("64")) {
+        if (osArchProperty.contains("aarch64") || (osArchProperty.contains("arm") && (osArchProperty.contains("64") || osArchProperty.contains("v8")))) {
+            return "arm64-v8a";
+        } else if (osArchProperty.contains("aarch32") || (osArchProperty.contains("arm") && (osArchProperty.contains("32") || osArchProperty.contains("v7")))) {
+            return "armv7a";
+        } else if (osArchProperty.contains("64")) {
             return "x86-64";
         } else if (osArchProperty.contains("86")) {
             return "x86";
@@ -128,7 +134,12 @@ public class Devolay {
      */
     public static int loadLibraries() {
         if(!librariesLoaded.get()) {
-            int ret = nLoadLibraries(extractedNdiLibraryPath.get());
+            int ret;
+            if (extractedNdiLibraryPath != null) {
+                ret = nLoadLibraries(extractedNdiLibraryPath);
+            } else {
+                ret = nLoadLibraries(null);
+            }
             if(ret == 0) {
                 librariesLoaded.set(true);
             }

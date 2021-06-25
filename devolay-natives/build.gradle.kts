@@ -43,11 +43,20 @@ val downloadJniMdHeaderWindows by tasks.registering(Download::class) {
 
 tasks.withType(CppCompile::class).configureEach {
     compilerArgs.addAll(toolChain.map { toolChain ->
-        when (toolChain) {
-            is VisualCpp -> listOf("/std:c++11")
-            is Gcc -> listOf("-lstdc++", "-std=c++11", "-static-libgcc", "-static-libstdc++", "-ldl")
-            is Clang -> listOf("-lstdc++", "-std=c++11", "-static-libstdc++", "-ldl")
-            else -> listOf()
+        if (this@configureEach.name.toLowerCase().contains("windows")) {
+            when (toolChain) {
+                is VisualCpp -> listOf("/std:c++11")
+                is Gcc -> listOf("-lstdc++", "-std=c++11", "-static-libgcc", "-static-libstdc++")
+                is Clang -> listOf("-lstdc++", "-std=c++11", "-static-libstdc++")
+                else -> listOf()
+            }
+        } else {
+            when (toolChain) {
+                is VisualCpp -> listOf("/std:c++11")
+                is Gcc -> listOf("-lstdc++", "-std=c++11", "-static-libgcc", "-static-libstdc++", "-ldl")
+                is Clang -> listOf("-lstdc++", "-std=c++11", "-static-libstdc++", "-ldl")
+                else -> listOf()
+            }
         }
     })
 
@@ -59,10 +68,18 @@ tasks.withType(CppCompile::class).configureEach {
 
 tasks.withType(LinkSharedLibrary::class).configureEach {
     linkerArgs.addAll(toolChain.map { toolChain ->
-        when (toolChain) {
-            is Gcc -> listOf("-shared", "-static-libgcc", "-static-libstdc++", "-ldl")
-            is Clang -> listOf("-shared", "-static-libstdc++", "-ldl")
-            else -> listOf()
+        if (this@configureEach.name.toLowerCase().contains("windows")) {
+            when (toolChain) {
+                is Gcc -> listOf("-shared", "-static-libgcc", "-static-libstdc++")
+                is Clang -> listOf("-shared", "-static-libstdc++")
+                else -> listOf()
+            }
+        } else {
+            when (toolChain) {
+                is Gcc -> listOf("-shared", "-static-libgcc", "-static-libstdc++", "-ldl")
+                is Clang -> listOf("-shared", "-static-libstdc++", "-ldl")
+                else -> listOf()
+            }
         }
     })
 

@@ -45,7 +45,8 @@ tasks.withType(CppCompile::class).configureEach {
     compilerArgs.addAll(toolChain.map { toolChain ->
         when (toolChain) {
             is VisualCpp -> listOf("/std:c++11")
-            is GccCompatibleToolChain -> listOf("-lstdc++", "-std=c++11", "-static-libgcc", "-static-libstdc++", "-ldl")
+            is Gcc -> listOf("-lstdc++", "-std=c++11", "-static-libgcc", "-static-libstdc++", "-ldl")
+            is Clang -> listOf("-lstdc++", "-std=c++11", "-static-libstdc++", "-ldl")
             else -> listOf()
         }
     })
@@ -59,7 +60,8 @@ tasks.withType(CppCompile::class).configureEach {
 tasks.withType(LinkSharedLibrary::class).configureEach {
     linkerArgs.addAll(toolChain.map { toolChain ->
         when (toolChain) {
-            is GccCompatibleToolChain -> listOf("-shared", "-static-libgcc", "-static-libstdc++", "-ldl")
+            is Gcc -> listOf("-shared", "-static-libgcc", "-static-libstdc++", "-ldl")
+            is Clang -> listOf("-shared", "-static-libstdc++", "-ldl")
             else -> listOf()
         }
     })

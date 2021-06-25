@@ -8,7 +8,7 @@ jobs:
 
     steps:
     - name: Install Dependencies
-      run: sudo apt install mingw-w64 innoextract bison flex texinfo unzip help2man libtool-bin libcurses5-dev libcursesw5-dev
+      run: sudo apt install mingw-w64 innoextract bison flex texinfo unzip help2man libtool-bin libncurses5-dev libncursesw5-dev
 
     - uses: actions/checkout@v2
     - name: Set up JDK 8

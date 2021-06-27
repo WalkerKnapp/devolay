@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'me.walkerknapp:devolay:2.0.1'
+    implementation 'me.walkerknapp:devolay:2.0.2'
 }
 ```
 
@@ -25,7 +25,7 @@ dependencies {
 <dependency>
   <groupId>me.walkerknapp</groupId>
   <artifactId>devolay</artifactId>
-  <version>2.0.1</version>
+  <version>2.0.2</version>
 </dependency>
 ```
 
@@ -44,7 +44,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'me.walkerknapp:devolay:2.0.1:integrated'
+    implementation 'me.walkerknapp:devolay:2.0.2:integrated'
 }
 ```
 
@@ -53,7 +53,7 @@ dependencies {
 <dependency>
   <groupId>me.walkerknapp</groupId>
   <artifactId>devolay</artifactId>
-  <version>2.0.1</version>
+  <version>2.0.2</version>
   <classifier>integrated</classifier>  
 </dependency>
 ```

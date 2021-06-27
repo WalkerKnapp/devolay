@@ -34,7 +34,7 @@ dependencies {
 Integrated builds contain NDI SDK binaries bundled into the Jar file,
 so end users do not need to install the NDI SDK.
 However, there are some licensing restrictions that must be followed
-if you use integrated builds in your product. Please see the [Licensing Considerations Section](#licensing-considerations).
+if you use integrated builds in your product. Please see the [Licensing Considerations Section](#%EF%B8%8Flicensing-considerations%EF%B8%8F).
 
 
 #### Gradle
@@ -79,7 +79,7 @@ Examples can be found in [examples/src/main/java/me/walkerknapp/devolayexamples]
 
 ### Android Users
 
-On Android, NDI needs access to the Network Service Discovery Manager, so an instance of the "NsdManager" needs to be
+On Android, NDI needs access to the Network Service Discovery Manager, so an instance of `NsdManager` needs to be
 exist whenever a sender, finder, or receiver is instantiated. This can be done by adding this to the beginning of long-running activities:
 ```java
 private NsdManager nsdManager;

@@ -11,7 +11,6 @@ plugins {
 
 apply {
     from("gradle/toolchains.gradle.kts")
-    from("gradle/ndi.gradle.kts")
 }
 
 // Download gulrak/filesystem to replace c++17's filesystem if not supported by the current system.

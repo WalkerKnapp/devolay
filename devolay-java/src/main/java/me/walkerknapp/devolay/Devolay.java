@@ -2,13 +2,12 @@ package me.walkerknapp.devolay;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Devolay {
 
@@ -23,37 +22,45 @@ public class Devolay {
         String osDirectory = getOsDirectory();
         String archDirectory = getArchDirectory();
 
-        // This is a nasty hack to get android to load *.so files from a jar.
-        // Normally, these would be expected to be bundled in an *.arr, but it is difficult to construct
-        // one without the com.android.library plugin, which is incompatible with the java-library plugin.
-        // If anyone has a better solution for this, I would be very open to suggestions.
-        if (osDirectory.equals("android")) {
-            devolayLibraryName = "libdevolay-natives.androidnative";
-            ndiLibraryName = "libndi.androidnative";
+        if (!osDirectory.equals("android")) {
+            Path devolayNativesPath = extractNative("devolay-natives", libraryExtension,
+                    "/natives/" + osDirectory + "/" + archDirectory + "/" + devolayLibraryName);
+            Path ndiLibraryPath = extractNative("ndi", libraryExtension,
+                    "/natives/" + osDirectory + "/" + archDirectory + "/" + ndiLibraryName);
+
+            if (devolayNativesPath == null) {
+                throw new IllegalStateException("This build of Devolay is not compiled for your OS. Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.");
+            }
+
+            if (ndiLibraryPath != null) {
+                extractedNdiLibraryPath = ndiLibraryPath.toAbsolutePath().toString();
+            }
+
+            System.load(devolayNativesPath.toAbsolutePath().toString());
+        } else {
+            // Devolay on Android should be loaded as an aar, so natives don't have to be extracted.
+            System.loadLibrary("devolay-natives");
+            extractedNdiLibraryPath = findLibrary("ndi");
         }
 
-        Path devolayNativesPath = extractNative("devolay-natives", libraryExtension,
-                "/natives/" + osDirectory + "/" + archDirectory + "/" + devolayLibraryName);
-        Path ndiLibraryPath = extractNative("ndi", libraryExtension,
-                "/natives/" + osDirectory + "/" + archDirectory + "/" + ndiLibraryName);
-
-        if (devolayNativesPath == null) {
-            throw new IllegalStateException("This build of Devolay is not compiled for your OS. Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.");
-        }
-
-        if (ndiLibraryPath != null) {
-            extractedNdiLibraryPath = ndiLibraryPath.toAbsolutePath().toString();
-        }
-
-        System.load(devolayNativesPath.toAbsolutePath().toString());
-
-        int ret = loadLibraries();
-        if(ret != 0) {
-            // The libraries are not correctly installed.
-            if(ret == -1) {
-                throw new IllegalStateException("The NDI(tm) SDK libraries were not found.");
-            } else if(ret == -2) {
-                throw new IllegalStateException("The NDI(tm) SDK libraries failed to load. Please reinstall.");
+        try {
+            int ret = loadLibraries();
+            if (ret != 0) {
+                // The libraries are not correctly installed.
+                if (ret == -1) {
+                    throw new IllegalStateException("The NDI(tm) SDK libraries were not found.");
+                } else if (ret == -2) {
+                    throw new IllegalStateException("The NDI(tm) SDK libraries failed to load. Please reinstall.");
+                }
+            }
+        } catch (UnsatisfiedLinkError e) {
+            if (osDirectory.equals("android")) {
+                throw new IllegalStateException("Devolay natives failed to load correctly." +
+                        " Please ensure that you are using the android-specific builds!" +
+                        " See https://github.com/WalkerKnapp/devolay#android-builds.", e);
+            } else {
+                throw new IllegalStateException("Devolay natives failed to load correctly. This is likely because this build of Devolay is not compiled for your OS." +
+                        " Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.", e);
             }
         }
     }
@@ -121,6 +128,16 @@ public class Devolay {
             return tempPath;
         } catch (IOException e) {
             throw new IllegalStateException(e);
+        }
+    }
+
+    private static String findLibrary(String libraryName) {
+        try {
+            Method findLibraryHandle = ClassLoader.class.getDeclaredMethod("findLibrary", String.class);
+            findLibraryHandle.setAccessible(true);
+            return (String) findLibraryHandle.invoke(Devolay.class.getClassLoader(), libraryName);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            return null;
         }
     }
 

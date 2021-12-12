@@ -58,12 +58,29 @@ dependencies {
 </dependency>
 ```
 
+### Android Builds
+
+Android builds contain NDI SDK binaries bundled into the Aar file.
+Therefore, there are some licensing restrictions that must be followed
+if you use android builds in your product. Please see the [Licensing Considerations Section](#%EF%B8%8Flicensing-considerations%EF%B8%8F).
+
+#### Gradle
+```groovy
+dependencies {
+    implementation('me.walkerknapp:devolay:2.0.2') {
+        artifact {
+            name = "devolay"
+            type = "aar"
+        }
+    }
+}
+```
 
 ## ⚠️Licensing Considerations⚠️
 
 `Separated` Builds do not contain any assets restricted under the NDI SDK License Agreement.
-However, `Integrated` Builds contain binary files from each platform's NDI SDK.
-Therefore, any products distributed to end users that use `Integrated` Builds **must** follow the guidelines in section 5.2 of the NDI SDK Documentation.
+However, `Integrated` and `Android` Builds contain binary files from each platform's NDI SDK.
+Therefore, any products distributed to end users that use `Integrated` or `Android` Builds **must** follow the guidelines in section 5.2 of the NDI SDK Documentation.
 
 For full details, please install the NDI SDK and read the NDI SDK Documentation and NDI SDK License Agreement.
 To summarize to the best of my knowledge (not legal advice, please get legal consultation any serious application),

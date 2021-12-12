@@ -64,6 +64,10 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew publishToMavenLocal -DandroidNdk=/usr/local/lib/android/sdk/ndk-bundle
+      env:
+        PGP_KEY: ${{ secrets.PGP_KEY }}
+        PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
+        PGP_PASSWORD: ${{ secrets.PGP_PASSWORD }}
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v1

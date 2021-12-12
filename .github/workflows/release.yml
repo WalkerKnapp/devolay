@@ -27,7 +27,7 @@ jobs:
         id: cacheNDI
         with:
           path: 'NDI SDK*'
-          key: ${{ runner.os }}-ndi5
+          key: ${{ runner.os }}-ndiv5
 
       - name: Setup the NDI SDK
         if: steps.cacheNDI.outputs.cache-hit != 'true'
@@ -37,12 +37,14 @@ jobs:
           rm Install_NDI_SDK_v5_Linux.tar.gz && rm Install_NDI_SDK_v5_Linux.sh
           wget https://downloads.ndi.tv/SDK/NDI_SDK_Android/Install_NDI_Advanced_SDK_v5_Android.tar.gz && tar -xvf Install_NDI_Advanced_SDK_v5_Android.tar.gz
           yes | ./Install_NDI_Advanced_SDK_v5_Android.sh > /dev/null
+          mv "NDI Advanced SDK for Android" "NDI SDK for Android"
           rm Install_NDI_Advanced_SDK_v5_Android.tar.gz && rm Install_NDI_Advanced_SDK_v5_Android.sh
           wget https://downloads.ndi.tv/SDK/NDI_SDK/NDI%205%20SDK.exe && /opt/innoextract-1.9-linux/innoextract "NDI 5 SDK.exe"
           mkdir "NDI SDK for Windows" && mv app/* "NDI SDK for Windows"
           rm -r app && rm "NDI 5 SDK.exe"
           wget https://downloads.ndi.tv/SDK/NDI_SDK_Mac/Install_NDI_SDK_v5_macOS.pkg && 7z x Install_NDI_SDK_v5_macOS.pkg
           7z x Payload~
+          mv "NDI SDK for macOS" "NDI SDK for Apple"
           rm Install_NDI_SDK_v5_macOS.pkg && rm Payload~
 
       - uses: actions/cache@v2

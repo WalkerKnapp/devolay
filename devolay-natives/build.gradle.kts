@@ -231,7 +231,7 @@ val assembleIntegratedNDIArtifacts by tasks.registering(Jar::class) {
                     nativeLicensePaths.add(file("../NDI SDK for Apple/licenses/libndi_licenses.txt").toPath())
                     when (machine.architecture.name) {
                         "x86-64" -> {
-                            nativeLibPath = file("../NDI SDK for Apple/lib/x64/libndi.4.dylib").toPath()
+                            nativeLibPath = file("../NDI SDK for Apple/lib/macOS/libndi.dylib").toPath()
                         }
                     }
                 } else if (machine.operatingSystemFamily.name == "linux") {

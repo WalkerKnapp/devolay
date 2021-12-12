@@ -11,7 +11,7 @@ jobs:
       run: sudo apt install mingw-w64 bison flex texinfo unzip help2man libtool-bin libncurses5-dev libncursesw5-dev
 
     - name: Install innoextract
-      run: wget https://constexpr.org/innoextract/files/innoextract-1.9-linux.tar.xz && tar -xvf innoextract-1.9-linux.tar.xz
+      run: wget https://constexpr.org/innoextract/files/innoextract-1.9-linux.tar.xz && sudo tar --directory=/opt -xvf innoextract-1.9-linux.tar.xz
 
     - uses: actions/checkout@v2
     - name: Set up JDK 8
@@ -34,7 +34,7 @@ jobs:
         wget https://downloads.ndi.tv/SDK/NDI_SDK_Android/Install_NDI_Advanced_SDK_v5_Android.tar.gz && tar -xvf Install_NDI_Advanced_SDK_v5_Android.tar.gz
         yes | ./Install_NDI_Advanced_SDK_v5_Android.sh > /dev/null
         rm Install_NDI_Advanced_SDK_v5_Android.tar.gz && rm Install_NDI_Advanced_SDK_v5_Android.sh
-        wget https://downloads.ndi.tv/SDK/NDI_SDK/NDI%205%20SDK.exe && ./innoextract-1.9-linux/innoextract "NDI 5 SDK.exe"
+        wget https://downloads.ndi.tv/SDK/NDI_SDK/NDI%205%20SDK.exe && /opt/innoextract-1.9-linux/innoextract "NDI 5 SDK.exe"
         mkdir "NDI SDK for Windows" && mv app/* "NDI SDK for Windows"
         rm -r app && rm "NDI 5 SDK.exe"
         wget https://downloads.ndi.tv/SDK/NDI_SDK_Mac/Install_NDI_SDK_v5_macOS.pkg && 7z x Install_NDI_SDK_v5_macOS.pkg

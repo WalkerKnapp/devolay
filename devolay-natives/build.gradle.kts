@@ -184,15 +184,11 @@ val assembleNativeArtifacts by tasks.registering(Jar::class) {
                 val machine = this.targetMachine
 
                 // Only include release binaries
-                if (this.isOptimized && !this.getName().toLowerCase().contains("debug")) {
+                if (this.isOptimized && !this.getName().toLowerCase().contains("debug") && machine.operatingSystemFamily.name != "android") {
                     from(this.outputs) {
                         into("natives/" + machine.operatingSystemFamily.name + "/" + machine.architecture.name)
                         exclude("*.lib")
                         exclude("*.debug")
-
-                        if (machine.operatingSystemFamily.name == "android") {
-                            rename { it.subSequence(0, it.lastIndexOf('.')).toString() + ".androidnative" }
-                        }
                     }
                 }
             }
@@ -213,25 +209,12 @@ val assembleIntegratedNDIArtifacts by tasks.registering(Jar::class) {
                 val nativeLicensePaths: MutableList<Path> = mutableListOf();
                 var nativeLibName: String? = null;
 
+                // Skip android binaries because we package them separately
                 if (machine.operatingSystemFamily.name == "android") {
-                    nativeLibName = "libndi.androidnative"
-                    nativeLicensePaths.add(file("../NDI SDK for Android/licenses/Bonjour.txt").toPath())
-                    nativeLicensePaths.add(file("../NDI SDK for Android/licenses/libndi_licenses.txt").toPath())
-                    when (machine.architecture.name) {
-                        "armv7a" -> {
-                            nativeLibPath = file("../NDI SDK for Android/lib/armeabi-v7a/libndi.so").toPath()
-                        }
-                        "arm64-v8a" -> {
-                            nativeLibPath = file("../NDI SDK for Android/lib/arm64-v8a/libndi.so").toPath()
-                        }
-                        "x86" -> {
-                            nativeLibPath = file("../NDI SDK for Android/lib/x86/libndi.so").toPath()
-                        }
-                        "x86-64" -> {
-                            nativeLibPath = file("../NDI SDK for Android/lib/x86_64/libndi.so").toPath()
-                        }
-                    }
-                } else if (machine.operatingSystemFamily.name == "windows") {
+                    return@whenElementFinalized
+                }
+
+                if (machine.operatingSystemFamily.name == "windows") {
                     nativeLibName = "ndi.dll"
                     when (machine.architecture.name) {
                         "x86" -> {
@@ -296,17 +279,72 @@ val assembleIntegratedNDIArtifacts by tasks.registering(Jar::class) {
     }
 }
 
-val nativeArtifacts: Configuration? by configurations.creating {
-    isCanBeConsumed = true
-    isCanBeResolved = false
+val assembleAndroidArtifacts by tasks.registering(Copy::class) {
+    into(temporaryDir)
+
+    components.withType(ComponentWithBinaries::class).forEach { component ->
+        (component as ComponentWithBinaries).binaries.whenElementFinalized(ComponentWithOutputs::class.java) {
+            if (this is ComponentWithNativeRuntime && this.isOptimized) {
+                val machine = this.targetMachine
+
+                var nativeLibPath: Path? = null;
+                var androidAbi: String? = null;
+
+                if (machine.operatingSystemFamily.name == "android") {
+                    // Identify android architecture
+                    when (machine.architecture.name) {
+                        "armv7a" -> {
+                            nativeLibPath = file("../NDI SDK for Android/lib/armeabi-v7a/libndi.so").toPath()
+                            androidAbi = "armeabi-v7a"
+                        }
+                        "arm64-v8a" -> {
+                            nativeLibPath = file("../NDI SDK for Android/lib/arm64-v8a/libndi.so").toPath()
+                            androidAbi = "arm64-v8a"
+                        }
+                        "x86" -> {
+                            nativeLibPath = file("../NDI SDK for Android/lib/x86/libndi.so").toPath()
+                            androidAbi = "x86"
+                        }
+                        "x86-64" -> {
+                            nativeLibPath = file("../NDI SDK for Android/lib/x86_64/libndi.so").toPath()
+                            androidAbi = "x86_64"
+                        }
+                    }
+
+                    // Add NDI Binaries
+                    if (nativeLibPath == null || !Files.exists(nativeLibPath)) {
+                        System.err.println("Could not find NDI lib in expected location (" + nativeLibPath.toString() + ") for OS \"" + machine.operatingSystemFamily.name + "\" and arch \"" + machine.architecture.name + "\". No android builds available.")
+                    } else {
+                        println("Adding NDI lib from " + nativeLibPath.toString() + " to android build.")
+                        from(nativeLibPath!!) {
+                            into("jni/" + androidAbi!!)
+                        }
+                        from("../NDI SDK for Android/licenses/Bonjour.txt") {
+                            into("jni/" + androidAbi!!)
+                        }
+                        from("../NDI SDK for Android/licenses/libndi_licenses.txt") {
+                            into("jni/" + androidAbi!!)
+                        }
+                    }
+
+                    // Add Devolay binaries
+                    from(this.outputs) {
+                        into("jni/" + androidAbi!!)
+                        exclude("*.lib")
+                        exclude("*.debug")
+                    }
+                }
+            }
+        }
+    }
 }
 
-val integratedNdiArtifacts: Configuration? by configurations.creating {
-    isCanBeConsumed = true
-    isCanBeResolved = false
-}
+val nativeArtifacts: Configuration? by configurations.creating
+val integratedNdiArtifacts: Configuration? by configurations.creating
+val androidArtifacts: Configuration? by configurations.creating
 
 artifacts {
     add("nativeArtifacts", assembleNativeArtifacts)
     add("integratedNdiArtifacts", assembleIntegratedNDIArtifacts)
+    add("androidArtifacts", assembleAndroidArtifacts)
 }

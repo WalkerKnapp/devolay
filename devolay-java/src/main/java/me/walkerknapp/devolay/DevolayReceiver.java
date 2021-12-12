@@ -147,7 +147,7 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
      * @param source The source to connect to, or null to disconnect.
      */
     public void connect(DevolaySource source) {
-        receiveConnect(ndilibRecievePointer, source.structPointer);
+        receiveConnect(ndilibRecievePointer, source == null ? 0L : source.structPointer);
     }
 
     /**

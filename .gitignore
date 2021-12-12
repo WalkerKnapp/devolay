@@ -7,5 +7,7 @@
 /devolay-java/keys.properties
 /devolay-natives/.idea/
 /devolay-natives/cmake-build-debug/
+/NDI SDK for Windows/
+/NDI SDK for Android/
 /NDI SDK for Apple/
 /NDI SDK for Linux/

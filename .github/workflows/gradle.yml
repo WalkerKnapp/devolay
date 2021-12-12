@@ -8,7 +8,10 @@ jobs:
 
     steps:
     - name: Install Dependencies
-      run: sudo apt install mingw-w64 innoextract bison flex texinfo unzip help2man libtool-bin libncurses5-dev libncursesw5-dev
+      run: sudo apt install mingw-w64 bison flex texinfo unzip help2man libtool-bin libncurses5-dev libncursesw5-dev
+
+    - name: Install innoextract
+      run: wget https://constexpr.org/innoextract/files/innoextract-1.9-linux.tar.xz && sudo tar --directory=/opt -xvf innoextract-1.9-linux.tar.xz
 
     - uses: actions/checkout@v2
     - name: Set up JDK 8
@@ -20,23 +23,23 @@ jobs:
       id: cacheNDI
       with:
         path: 'NDI SDK*'
-        key: ${{ runner.os }}-ndi
+        key: ${{ runner.os }}-ndi5
 
     - name: Setup the NDI SDK
       if: steps.cacheNDI.outputs.cache-hit != 'true'
       run: |
-        wget https://downloads.ndi.tv/SDK/NDI_SDK_Linux/InstallNDISDK_v4_Linux.tar.gz && tar -xvf InstallNDISDK_v4_Linux.tar.gz
-        yes | ./InstallNDISDK_v4_Linux.sh > /dev/null
-        rm InstallNDISDK_v4_Linux.tar.gz && rm InstallNDISDK_v4_Linux.sh
-        wget https://downloads.ndi.tv/SDK/NDI_SDK_Android/InstallNDISDK_v4_Android.tar.gz && tar -xvf InstallNDISDK_v4_Android.tar.gz
-        yes | ./InstallNDISDK_v4_Android.sh > /dev/null
-        rm InstallNDISDK_v4_Android.tar.gz && rm InstallNDISDK_v4_Android.sh
-        wget https://downloads.ndi.tv/SDK/NDI_SDK/NDI%204%20SDK.exe && innoextract "NDI 4 SDK.exe"
+        wget https://downloads.ndi.tv/SDK/NDI_SDK_Linux/Install_NDI_SDK_v5_Linux.tar.gz && tar -xvf Install_NDI_SDK_v5_Linux.tar.gz
+        yes | ./Install_NDI_SDK_v5_Linux.sh > /dev/null
+        rm Install_NDI_SDK_v5_Linux.tar.gz && rm Install_NDI_SDK_v5_Linux.sh
+        wget https://downloads.ndi.tv/SDK/NDI_SDK_Android/Install_NDI_Advanced_SDK_v5_Android.tar.gz && tar -xvf Install_NDI_Advanced_SDK_v5_Android.tar.gz
+        yes | ./Install_NDI_Advanced_SDK_v5_Android.sh > /dev/null
+        rm Install_NDI_Advanced_SDK_v5_Android.tar.gz && rm Install_NDI_Advanced_SDK_v5_Android.sh
+        wget https://downloads.ndi.tv/SDK/NDI_SDK/NDI%205%20SDK.exe && /opt/innoextract-1.9-linux/innoextract "NDI 5 SDK.exe"
         mkdir "NDI SDK for Windows" && mv app/* "NDI SDK for Windows"
-        rm -r app && rm "NDI 4 SDK.exe"
-        wget https://downloads.ndi.tv/SDK/NDI_SDK_Mac/InstallNDISDK_v4_Apple.pkg && 7z x InstallNDISDK_v4_Apple.pkg
+        rm -r app && rm "NDI 5 SDK.exe"
+        wget https://downloads.ndi.tv/SDK/NDI_SDK_Mac/Install_NDI_SDK_v5_macOS.pkg && 7z x Install_NDI_SDK_v5_macOS.pkg
         7z x Payload~
-        rm InstallNDISDK_v4_Apple.pkg && rm Payload~
+        rm Install_NDI_SDK_v5_macOS.pkg && rm Payload~
 
     - uses: actions/cache@v2
       id: cachetoolchain
@@ -63,7 +66,11 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew assemble -DandroidNdk=/usr/local/lib/android/sdk/ndk-bundle
+      run: ./gradlew publishToMavenLocal -DandroidNdk=/usr/local/lib/android/sdk/ndk-bundle
+      env:
+        PGP_KEY: ${{ secrets.PGP_KEY }}
+        PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
+        PGP_PASSWORD: ${{ secrets.PGP_PASSWORD }}
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v1

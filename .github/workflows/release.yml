@@ -24,7 +24,7 @@ jobs:
         id: cacheNDI
         with:
           path: 'NDI SDK*'
-          key: ${{ runner.os }}-ndi
+          key: ${{ runner.os }}-ndi5
 
       - name: Setup the NDI SDK
         if: steps.cacheNDI.outputs.cache-hit != 'true'

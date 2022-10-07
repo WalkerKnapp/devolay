@@ -15,7 +15,7 @@ public class DevolayTally {
      * @param isOnProgram If the current sender is being displayed on program.
      * @param isOnPreview If the current sender is being displayed on preview.
      */
-    DevolayTally(boolean isOnProgram, boolean isOnPreview) {
+    public DevolayTally(boolean isOnProgram, boolean isOnPreview) {
         this.isOnProgram = isOnProgram;
         this.isOnPreview = isOnPreview;
     }

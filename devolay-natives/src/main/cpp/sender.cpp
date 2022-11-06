@@ -107,12 +107,12 @@ JNIEXPORT jlong JNICALL Java_me_walkerknapp_devolay_DevolaySender_getSource(JNIE
 }
 
 JNIEXPORT jint JNICALL Java_me_walkerknapp_devolay_DevolaySender_sendCapture(JNIEnv *env, jclass jClazz, jlong pSender, jlong pMetadataFrame, jint jTimeout) {
-    return getNDILib()->send_capture(reinterpret_cast<NDIlib_send_instance_t *>(pSender),
+    return getNDILib()->send_capture(reinterpret_cast<NDIlib_send_instance_t>(pSender),
                                      reinterpret_cast<NDIlib_metadata_frame_t *>(pMetadataFrame),
                                      jTimeout);
 }
 
 JNIEXPORT void JNICALL Java_me_walkerknapp_devolay_DevolaySender_freeMetadata(JNIEnv *env, jclass jClazz, jlong pSender, jlong pMetadataFrame) {
-    getNDILib()->recv_free_metadata(reinterpret_cast<NDIlib_send_instance_t *>(pSender),
+    getNDILib()->send_free_metadata(reinterpret_cast<NDIlib_send_instance_t>(pSender),
                               reinterpret_cast<NDIlib_metadata_frame_t *>(pMetadataFrame));
 }

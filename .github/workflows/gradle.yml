@@ -13,6 +13,9 @@ jobs:
     - name: Install innoextract
       run: wget https://constexpr.org/innoextract/files/innoextract-1.9-linux.tar.xz && sudo tar --directory=/opt -xvf innoextract-1.9-linux.tar.xz
 
+    - name: Install Android NDK
+      run: echo "y" | sudo /usr/local/lib/android/sdk/tools/bin/sdkmanager --install "ndk;25.1.8937393"
+
     - uses: actions/checkout@v2
     - name: Set up JDK 8
       uses: actions/setup-java@v1

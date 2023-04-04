@@ -70,6 +70,14 @@ JNIEXPORT jboolean JNICALL Java_me_walkerknapp_devolay_DevolayReceiver_receiveSe
                                      reinterpret_cast<NDIlib_metadata_frame_t *>(pMetadataFrame));
 }
 
+JNIEXPORT jboolean JNICALL Java_me_walkerknapp_devolay_DevolayReceiver_receiveSetTally(JNIEnv *env, jclass jClazz, jlong pReceiver, jboolean jProgram, jboolean jPreview) {
+    NDIlib_tally_t tally_create;
+    tally_create.on_program = static_cast<bool>(jProgram);
+    tally_create.on_preview = static_cast<bool>(jPreview);
+    auto ret = getNDILib()->recv_set_tally(reinterpret_cast<NDIlib_recv_instance_t>(pReceiver), &tally_create);
+    return ret;
+}
+
 JNIEXPORT void JNICALL Java_me_walkerknapp_devolay_DevolayReceiver_receiveGetPerformance(JNIEnv *env, jclass jClazz, jlong pReceiver, jlong pTotalPerformance, jlong pDroppedPerformance) {
     getNDILib()->recv_get_performance(reinterpret_cast<NDIlib_recv_instance_t>(pReceiver),
                                 reinterpret_cast<NDIlib_recv_performance_t *>(pTotalPerformance),

@@ -209,7 +209,15 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
         return receiveSendMetadata(ndilibRecievePointer, metadataFrame.structPointer);
     }
 
-    // TODO: NDIlib_recv_set_tally
+    /**
+     * Set tally state on the source
+     *
+     * @param tally The {@link DevolayTally} state to send.
+     * @return true if a source is connected, false if the receiver is disconnected.
+     */
+    public boolean setTally(DevolayTally tally) {
+        return receiveSetTally(ndilibRecievePointer, tally.isOnProgram(), tally.isOnPreview());
+    }
 
     /**
      * Fills in a {@link DevolayPerformanceData} structure with performance information about the receiver.
@@ -296,6 +304,7 @@ public class DevolayReceiver extends DevolayFrameCleaner implements AutoCloseabl
     private static native void freeAudioV2(long structPointer, long pAudioFrame);
     private static native void freeMetadata(long structPointer, long pMetadata);
     private static native boolean receiveSendMetadata(long structPointer, long pMetadataFrame);
+    private static native boolean receiveSetTally(long structPointer, boolean isOnProgram, boolean isOnPreview);
 
     private static native void receiveGetPerformance(long structPointer, long pTotalPerformance, long pDroppedPerformance);
 

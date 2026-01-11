@@ -6,14 +6,55 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Used to control loading of Devolay and NDI libraries.  
+ * 
+ * Loading of the Devolay native libraries requires either:
+ * <ul>
+ * <li>Using the devolay-integrated maven package</li>
+ * <li>Using the {@link #loadLibraries(Path, Path)} method to tell Devolay where the devolay native is</li>
+ * </ul>
+ * 
+ * Loading of the NDI native libraries requires either:
+ * <ul>
+ * <li>Using the devolay-integrated maven package</li>
+ * <li>Android - libraries are loaded from an aar</li>
+ * <li>Using the {@link #loadLibraries(Path, Path)} method to tell Devolay where the NDI native is</li>
+ * </ul>
+ * 
+ * Recommended usage:
+ * <ul>
+ * <li>Use the devolay-integrated maven package until you run into a problem.</li>
+ * <li>Windows / Windows Store deployment - use devolay-integrated</li>
+ * <li>Ubuntu / Snap Store deployment - use devolay-integrated</li>
+ * <li>MacOS - use devolay-integrated</li>
+ * <li>MacOS Store - manually load both Devolay and NDI libraries using {@link #loadLibraries(Path, Path)} and packaging the libraries per MacOS Store requirements</li>
+ * <li>Android - use devolay-integrated</li>
+ * </ul>
+ * 
+ * Example usage - In your app initialization:
+ * <pre>
+ * // to load the native libraries from the devolay-integrated maven package
+ * Devolay.loadLibraries();
+ * // or to manually load the native libraries
+ * Devolay.loadLibraries(pathToDevolayLibrary, pathToNDILibrary);
+ * </pre>
+ */
 public class Devolay {
 
     private static final AtomicBoolean librariesLoaded = new AtomicBoolean(false);
-    private static String extractedNdiLibraryPath = null;
-
+    private static Path extractedDevolayNativesPath = null;
+    private static Path extractedNDINativesPath = null;
+    
+    /**
+     * Only extract natives from the integrated build during static initialization
+     * so that the Devolay class can still be loaded and then used to load the native
+     * libraries from anywhere.
+     */
     static {
         String devolayLibraryName = System.mapLibraryName("devolay-natives");
         String ndiLibraryName = System.mapLibraryName("ndi");
@@ -23,45 +64,13 @@ public class Devolay {
         String archDirectory = getArchDirectory();
 
         if (!osDirectory.equals("android")) {
-            Path devolayNativesPath = extractNative("devolay-natives", libraryExtension,
+            extractedDevolayNativesPath = extractNative("devolay-natives", libraryExtension,
                     "/natives/" + osDirectory + "/" + archDirectory + "/" + devolayLibraryName);
-            Path ndiLibraryPath = extractNative("ndi", libraryExtension,
+            extractedNDINativesPath = extractNative("ndi", libraryExtension,
                     "/natives/" + osDirectory + "/" + archDirectory + "/" + ndiLibraryName);
-
-            if (devolayNativesPath == null) {
-                throw new IllegalStateException("This build of Devolay is not compiled for your OS. Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.");
-            }
-
-            if (ndiLibraryPath != null) {
-                extractedNdiLibraryPath = ndiLibraryPath.toAbsolutePath().toString();
-            }
-
-            System.load(devolayNativesPath.toAbsolutePath().toString());
         } else {
-            // Devolay on Android should be loaded as an aar, so natives don't have to be extracted.
-            System.loadLibrary("devolay-natives");
-            extractedNdiLibraryPath = findLibrary("ndi");
-        }
-
-        try {
-            int ret = loadLibraries();
-            if (ret != 0) {
-                // The libraries are not correctly installed.
-                if (ret == -1) {
-                    throw new IllegalStateException("The NDI(tm) SDK libraries were not found.");
-                } else if (ret == -2) {
-                    throw new IllegalStateException("The NDI(tm) SDK libraries failed to load. Please reinstall.");
-                }
-            }
-        } catch (UnsatisfiedLinkError e) {
-            if (osDirectory.equals("android")) {
-                throw new IllegalStateException("Devolay natives failed to load correctly." +
-                        " Please ensure that you are using the android-specific builds!" +
-                        " See https://github.com/WalkerKnapp/devolay#android-builds.", e);
-            } else {
-                throw new IllegalStateException("Devolay natives failed to load correctly. This is likely because this build of Devolay is not compiled for your OS." +
-                        " Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.", e);
-            }
+        	String path = findLibrary("ndi");
+            extractedNDINativesPath = Paths.get(path);
         }
     }
 
@@ -150,19 +159,69 @@ public class Devolay {
      *      -2 - The library load failed. (The end user should reinstall the libraries, and should be provided with the redist URL)
      */
     public static int loadLibraries() {
+    	return loadLibraries(null, null);
+    }
+    
+    /**
+     * Loads the native libraries for both Devolay and NDI.  The given paths can be null, in which case
+     * the extracted library locations will be used.
+     * @param overrideDevolayNativesPath can be null
+     * @param overrideNDINativesPath can be null
+     * @return int
+     * @throws IllegalStateException If the extracted paths are null
+     * @throws UnsatisfiedLinkError If the native library could not be found or loaded
+     * @see #loadLibraries()
+     */
+    public static int loadLibraries(Path overrideDevolayNativesPath, Path overrideNDINativesPath) {
         if(!librariesLoaded.get()) {
-            int ret;
-            if (extractedNdiLibraryPath != null) {
-                ret = nLoadLibraries(extractedNdiLibraryPath);
-            } else {
-                ret = nLoadLibraries(null);
+            // load devolay natives first
+            loadDevolayLibrary(overrideDevolayNativesPath != null ? overrideDevolayNativesPath : extractedDevolayNativesPath);
+
+            // load ndi natives next
+            int ret = loadNDILibrary(overrideNDINativesPath != null ? overrideNDINativesPath : extractedNDINativesPath);
+            
+            if (ret == 0) {
+	            // mark that we've loaded successfully
+	            librariesLoaded.set(true);
             }
-            if(ret == 0) {
-                librariesLoaded.set(true);
-            }
+            
             return ret;
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Loads the Devolay library at the given path.
+     * @param path the path; cannot be null
+     * @throws UnsatisfiedLinkError if the path cannot be loaded
+     * @throws NullPointerException if the path is null
+     */
+    private static void loadDevolayLibrary(Path path) {
+    	String osDirectory = getOsDirectory();
+
+        if (!osDirectory.equals("android")) {
+            if (path == null) {
+                throw new NullPointerException("This build of Devolay is not compiled for your OS. Please use a different build or follow the compilation instructions on https://github.com/WalkerKnapp/devolay.");
+            }
+
+            System.load(path.toAbsolutePath().toString());
         } else {
-            return 0;
+            // Devolay on Android should be loaded as an aar, so natives don't have to be extracted.
+            System.loadLibrary("devolay-natives");
+        }
+    }
+    
+    /**
+     * Loads the NDI library at the given path.
+     * @param path; when null, the library is loaded from an install directory
+     * @return int
+     */
+    private static int loadNDILibrary(Path path) {
+        if (path != null) {
+            return nLoadLibraries(path.toAbsolutePath().toString());
+        } else {
+            return nLoadLibraries(null);
         }
     }
 
@@ -170,8 +229,12 @@ public class Devolay {
      * Returns the current version of the underlying NDI(tm) library runtime.
      *
      * @return A string containing the version of the NDI(tm) runtimes.
+     * @throws IllegalStateException if loadLibraries has not been called or failed
      */
     public static String getNDIVersion() {
+    	if (!librariesLoaded.get())
+    		throw new IllegalStateException("The getNDIVersion method cannot be called until native libraries have been loaded using one of the loadLibraries methods.");
+
         return nGetVersion();
     }
 
@@ -179,9 +242,13 @@ public class Devolay {
      * Returns whether the current CPU in the system is capable of running NDI(tm), and by extension, Devolay.
      *
      * @return true if the system's CPU is capable of running NDI(tm), false if it is not capable.
+     * @throws IllegalStateException if loadLibraries has not been called or failed
      */
     public static boolean isSupportedCpu() {
-        return nIsSupportedCpu();
+    	if (!librariesLoaded.get())
+    		throw new IllegalStateException("The isSupportedCpu method cannot be called until native libraries have been loaded using one of the loadLibraries methods.");
+        
+    	return nIsSupportedCpu();
     }
 
     // Native Methods
